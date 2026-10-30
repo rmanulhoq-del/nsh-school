@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+    background-color: #f0f6f6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Prevent media elements and svgs from causing horizontal overflow */
+  img, svg, video, canvas, audio, iframe, embed, object {
+    max-width: 100%;
+  }
+}
+
+/* Custom smooth mobile touch scrollbars */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt;
+  }
+
+  /* CRITICAL PRINT ISOLATION:
+     When any printable modal is active, completely hide the entire background website (#root).
+     This guarantees that only the selected document (Receipt Slip, Marksheet, Tabulation, or Register)
+     is printed, without any background student cards, headers, filters, or extraneous text.
+  */
+  body.has-print-modal-open #root,
+  body:has(.printable-modal-portal) #root {
+    display: none !important;
+  }
+
+  /* Ensure the active printable modal portal renders cleanly on paper */
+  .printable-modal-portal {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .printable-modal-portal > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Hide non-print buttons, interactive controls, toolbars */
+  header,
+  nav,
+  footer,
+  .print-hidden,
+  button:not(.print-keep),
+  input:not([type="checkbox"]),
+  select {
+    display: none !important;
+  }
+
+  /* Make sure printable containers take full width without shadows */
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .shadow-xs,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Enable high-fidelity color printing for badges, headers, and borders */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+}
