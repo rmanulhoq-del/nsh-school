@@ -36,7 +36,8 @@ import {
   Eye,
   EyeOff,
   KeyRound,
-  Check
+  Check,
+  TrendingUp
 } from 'lucide-react';
 
 import SchoolLogo from './components/SchoolLogo';
@@ -45,11 +46,18 @@ import AboutTab from './components/AboutTab';
 import FacultyTab from './components/FacultyTab';
 import StaffTab from './components/StaffTab';
 import StudentsTab from './components/StudentsTab';
+import AttendanceHubTab from './components/AttendanceHubTab';
+import ExamsAndAdmitCardTab from './components/ExamsAndAdmitCardTab';
+import SmsGatewayTab from './components/SmsGatewayTab';
+import InstitutionalReportsTab from './components/InstitutionalReportsTab';
+import AcademicExcellenceTab from './components/AcademicExcellenceTab';
+import OnlineAdmissionModal from './components/OnlineAdmissionModal';
 import BankDashboardTab from './components/BankDashboardTab';
 import AdminDeskTab from './components/AdminDeskTab';
 import AiScannerTab from './components/AiScannerTab';
 import ContactTab from './components/ContactTab';
 import NoticeBoardTab from './components/NoticeBoardTab';
+import UrgentNoticeBar from './components/UrgentNoticeBar';
 import CommitteeTab from './components/CommitteeTab';
 import DonorsTab from './components/DonorsTab';
 import ParentsColumnTab from './components/ParentsColumnTab';
@@ -93,6 +101,10 @@ export default function App() {
   const [selectedStudentForSlip, setSelectedStudentForSlip] = useState<StudentDataForDispatch | null>(null);
   const [showSlipModal, setShowSlipModal] = useState<boolean>(false);
   const [showGlobalRegisterPrint, setShowGlobalRegisterPrint] = useState<boolean>(false);
+
+  // Online Admission Modal & SMS Prefill State
+  const [showAdmissionModal, setShowAdmissionModal] = useState<boolean>(false);
+  const [smsPrefillMessage, setSmsPrefillMessage] = useState<string>('');
 
   // Admin Users State with LocalStorage Persistence
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>(() => {
@@ -479,14 +491,20 @@ export default function App() {
 
   const navTabsList = [
     { id: 'home', label: language === 'bn' ? 'হোম' : 'Home', icon: Home },
-    { id: 'about', label: language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us', icon: Info },
-    { id: 'donors', label: language === 'bn' ? 'প্রতিষ্ঠাতা ও দাতা ফোরাম' : 'Founders & Donors', icon: HeartHandshake },
-    { id: 'committee', label: language === 'bn' ? 'পরিচালনা পর্ষদ' : 'Managing Committee', icon: Award },
+    { id: 'students', label: language === 'bn' ? 'শিক্ষার্থী ও ভর্তি' : 'Students & Admission', icon: GraduationCap },
+    { id: 'attendance', label: language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance', icon: UserCheck },
+    { id: 'exams', label: language === 'bn' ? 'পরীক্ষা ও প্রবেশপত্র' : 'Exams & Admit Card', icon: Award },
+    { id: 'sms', label: language === 'bn' ? 'SMS গেটওয়ে' : 'SMS Gateway', icon: MessageCircle },
+    { id: 'reports', label: language === 'bn' ? 'মাসিক ও বাৎসরিক রিপোর্ট' : 'Reports', icon: TrendingUp },
+    { id: 'banks', label: language === 'bn' ? 'ফি ও হিসাব' : 'Fees & Accounts', icon: Landmark },
+    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles },
     { id: 'teachers', label: language === 'bn' ? 'শিক্ষক ফোরাম' : "Teachers' Forum", icon: Users },
-    { id: 'staff', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: UserCheck },
-    { id: 'students', label: language === 'bn' ? 'শিক্ষার্থীর তথ্য' : 'Student Info', icon: GraduationCap },
+    { id: 'staff', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: ShieldCheck },
+    { id: 'committee', label: language === 'bn' ? 'পরিচালনা পর্ষদ' : 'Managing Committee', icon: Award },
+    { id: 'donors', label: language === 'bn' ? 'দাতা ফোরাম' : 'Donors', icon: HeartHandshake },
     { id: 'parents', label: language === 'bn' ? 'অভিভাবক কলাম' : 'Parents Column', icon: MessageCircle },
     { id: 'notices', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell },
+    { id: 'about', label: language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us', icon: Info },
     { id: 'contact', label: language === 'bn' ? 'যোগাযোগ' : 'Contact', icon: Phone }
   ];
 
@@ -738,6 +756,17 @@ export default function App() {
               </div>
             )}
 
+            {/* Apply Now / ভর্তি আবেদন Button (Matches user reference design) */}
+            <button
+              type="button"
+              onClick={() => setShowAdmissionModal(true)}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-black transition-all shadow-xs flex items-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95"
+              title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-white" />
+              <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
+            </button>
+
             {currentAdmin && (
               <button
                 type="button"
@@ -849,6 +878,16 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Urgent Notice Bar (Positioned above Menu Bar, matching user reference photo) */}
+        <UrgentNoticeBar
+          isAdmin={!!currentAdmin}
+          language={language}
+          onNavigateToNotices={() => {
+            setActiveTab('notices');
+            setIsMobileMenuOpen(false);
+          }}
+        />
 
         {/* Tier 3: Horizontal Swipeable Nav Strip (Zero-overlap guaranteed) */}
         <nav className="bg-[#092b50] border-t border-[#134377] w-full">
@@ -1021,6 +1060,49 @@ export default function App() {
               setShowSlipModal(true);
             }}
             onPrint={() => setShowGlobalRegisterPrint(true)}
+          />
+        )}
+
+        {activeTab === 'attendance' && (
+          <AttendanceHubTab
+            students={students}
+            teachers={teachers}
+            staffList={staffList}
+            isAdmin={!!currentAdmin}
+            onNavigateToSms={(note) => {
+              setSmsPrefillMessage(note || '');
+              setActiveTab('sms');
+            }}
+          />
+        )}
+
+        {activeTab === 'exams' && (
+          <ExamsAndAdmitCardTab
+            students={students}
+            isAdmin={!!currentAdmin}
+          />
+        )}
+
+        {activeTab === 'sms' && (
+          <SmsGatewayTab
+            students={students}
+            isAdmin={!!currentAdmin}
+            initialCustomMessage={smsPrefillMessage}
+          />
+        )}
+
+        {activeTab === 'reports' && (
+          <InstitutionalReportsTab
+            students={students}
+            teachers={teachers}
+            staffList={staffList}
+            isAdmin={!!currentAdmin}
+          />
+        )}
+
+        {activeTab === 'excellence' && (
+          <AcademicExcellenceTab
+            isAdmin={!!currentAdmin}
           />
         )}
 
@@ -1877,6 +1959,18 @@ export default function App() {
         setAdminUsers={setAdminUsers}
         currentAdmin={currentAdmin}
         setCurrentAdmin={setCurrentAdmin}
+      />
+
+      {/* ONLINE STUDENT ADMISSION MODAL */}
+      <OnlineAdmissionModal
+        isOpen={showAdmissionModal}
+        onClose={() => setShowAdmissionModal(false)}
+        existingCount={students.length}
+        onAddStudent={(newStudent) => {
+          const updated = [...students, newStudent];
+          setStudents(updated);
+          localStorage.setItem('school_students', JSON.stringify(updated));
+        }}
       />
     </div>
   );

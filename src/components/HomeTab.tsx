@@ -17,7 +17,10 @@ import {
   Check,
   ChevronRight,
   History,
-  User
+  User,
+  TrendingUp,
+  UserCheck,
+  MessageSquare
 } from 'lucide-react';
 import SchoolLogo from './SchoolLogo';
 import HeadmasterPortrait from './HeadmasterPortrait';
@@ -248,6 +251,98 @@ export default function HomeTab({
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* Smart School Services & Core Modules Grid */}
+      <div className="bg-white border border-[#d9e6e7] rounded-3xl p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-[#0c3664] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#d9482b]" />
+              <span>বিদ্যালয়ের প্রধান ডিজিটাল সার্ভিস ও কার্যক্রমসমূহ</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              হাজিরা, প্রবেশপত্র, পরীক্ষার ফলাফল, এসএমএস নোটিফিকেশন ও বিশেষজ্ঞ পরামর্শক পোর্টাল
+            </p>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            ১০+ ডিজিটাল মডিউল সক্রিয়
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* Card 1: Students & Admission */}
+          <div
+            onClick={() => setActiveTab('students')}
+            className="p-3.5 bg-gradient-to-b from-blue-50/50 to-white border border-blue-200/80 hover:border-blue-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#0c3664] mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">ভর্তি ও শিক্ষার্থী তথ্য</div>
+            <div className="text-[10px] text-slate-500">অনলাইন ফর্ম ও প্রোফাইল</div>
+          </div>
+
+          {/* Card 2: Attendance */}
+          <div
+            onClick={() => setActiveTab('attendance')}
+            className="p-3.5 bg-gradient-to-b from-emerald-50/50 to-white border border-emerald-200/80 hover:border-emerald-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">দৈনিক হাজিরা</div>
+            <div className="text-[10px] text-slate-500">ছাত্র ও শিক্ষক উপস্থিতি</div>
+          </div>
+
+          {/* Card 3: Exams & Admit Card */}
+          <div
+            onClick={() => setActiveTab('exams')}
+            className="p-3.5 bg-gradient-to-b from-amber-50/50 to-white border border-amber-200/80 hover:border-amber-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <Award className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">প্রবেশপত্র ও সিট প্ল্যান</div>
+            <div className="text-[10px] text-slate-500">অ্যাডমিট কার্ড ও ডেস্ক স্লিপ</div>
+          </div>
+
+          {/* Card 4: Report Card */}
+          <div
+            onClick={() => setActiveTab('exams')}
+            className="p-3.5 bg-gradient-to-b from-purple-50/50 to-white border border-purple-200/80 hover:border-purple-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <FilePlus className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">ফলাফল ও Report Card</div>
+            <div className="text-[10px] text-slate-500">গ্রেডিং ও মার্কশিট প্রিন্ট</div>
+          </div>
+
+          {/* Card 5: SMS Notification */}
+          <div
+            onClick={() => setActiveTab('sms')}
+            className="p-3.5 bg-gradient-to-b from-rose-50/50 to-white border border-rose-200/80 hover:border-rose-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">SMS নোটিফিকেশন</div>
+            <div className="text-[10px] text-slate-500">ফি ও হাজিরার বার্তা</div>
+          </div>
+
+          {/* Card 6: Excellence & Training */}
+          <div
+            onClick={() => setActiveTab('excellence')}
+            className="p-3.5 bg-gradient-to-b from-teal-50/50 to-white border border-teal-200/80 hover:border-teal-500 rounded-2xl cursor-pointer transition-all hover:shadow-xs group text-center space-y-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="font-extrabold text-xs text-slate-900 leading-tight">প্রশিক্ষণ ও মেধা বিকাশ</div>
+            <div className="text-[10px] text-slate-500">প্রতিযোগিতা ও পরামর্শক</div>
+          </div>
         </div>
       </div>
 
