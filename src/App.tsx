@@ -153,7 +153,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 1. TOP UTILITY BAR (No developer zip download buttons!) */}
+      {/* ১. টপ বার (ডেভেলপার জিপ বাটন ছাড়া একদম ফ্রেশ) */}
       <div className="bg-[#081a2e] text-slate-300 border-b border-slate-800 text-xs py-1.5 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -204,13 +204,12 @@ export default function App() {
         </div>
       </div>
 
-      {/* 2. HERO / HEADER SECTION (PERFECTLY ALIGNED ACTION BUTTONS) */}
+      {/* ২. হিরো / হেডার সেকশন (অফিস ডেস্ক বাটনটি নিখুঁতভাবে এলাইন করা) */}
       <header className="bg-[#0f2744] text-white border-b border-slate-800 py-3.5 px-4 sm:px-6 shadow-md">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
           
           {/* School Brand Identity */}
           <div className="flex items-center gap-3.5 w-full lg:w-auto justify-center lg:justify-start">
-            {/* School Crest / Logo */}
             <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-rose-600 p-0.5 shadow-lg shrink-0">
               <div className="w-full h-full rounded-full bg-[#081a2e] flex flex-col items-center justify-center text-center border-2 border-amber-300 relative overflow-hidden">
                 <School className="w-6 h-6 text-amber-300 mb-0.5" />
@@ -232,7 +231,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* ACTION BUTTONS: FIXED ALIGNMENT - ALL BUTTONS PERFECTLY IN ROW */}
+          {/* অ্যাকশন বাটনসমূহ: সব বাটন সমান উচ্চতায় ও সোজা লাইনে এলাইন করা */}
           <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 w-full lg:w-auto">
             
             {/* Admin Status Pill */}
@@ -281,7 +280,7 @@ export default function App() {
               <span>ভর্তি আবেদন</span>
             </button>
 
-            {/* OFFICE DESK BUTTON - PERFECTLY ALIGNED (Matching height, padding, flex properties) */}
+            {/* অফিস ডেস্ক বাটন: উচ্চতা ও প্যাডিং সমান করে সোজা লাইনে আনা হয়েছে */}
             <button
               onClick={() => {
                 setCurrentView('admin');
@@ -302,7 +301,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* 3. SUB-NAVBAR */}
+      {/* ৩. সাব-নেভিগেশন বার */}
       <nav className="bg-[#091e36] text-slate-200 border-b border-slate-800 text-xs shadow-inner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
           {navItems.map((item) => (
@@ -330,7 +329,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* 4. NOTICE TICKER BAR */}
+      {/* ৪. নোটিশ বার */}
       <div className="bg-white border-b border-slate-200 py-1.5 px-4 sm:px-6 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 shrink-0">
@@ -350,7 +349,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Marquee Notice */}
           <div className="overflow-hidden whitespace-nowrap flex-1 mx-3 text-slate-700 font-medium text-[12px]">
             <span className="inline-block animate-marquee">
               ✦ বিজ্ঞান মেলার রেজিস্ট্রেশন শুরু হয়েছে ✦ ২০২৪ শিক্ষাবর্ষের অর্ধবার্ষিক পরীক্ষার চূড়ান্ত সময়সূচি ঘোষণা ও প্রবেশপত্র সংগ্রহ ✦ ৬ষ্ঠ থেকে ১০ম শ্রেণির ডিজিটাল আইডি কার্ড বিতরণ চলছে ✦
@@ -369,10 +367,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* MAIN CONTAINER */}
+      {/* মূল কন্টেন্ট */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-        {/* 5. BREADCRUMB ACTION BAR */}
+        {/* ব্রেডক্রাম্ব */}
         <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-sm flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <button
@@ -398,11 +396,9 @@ export default function App() {
           </button>
         </div>
 
-        {/* 6. ADMIN OFFICER SESSION CARD */}
+        {/* প্রধান শিক্ষকের এডমিন সেশন কার্ড */}
         <div className="bg-gradient-to-r from-[#0c233c] via-[#102d4d] to-[#0c233c] text-white rounded-2xl p-5 shadow-lg border border-slate-700/60">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-            
-            {/* Officer Details */}
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-bold shadow-md shrink-0">
                 <Shield className="w-6 h-6 text-slate-950" />
@@ -426,7 +422,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Action Buttons for Headmaster */}
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               <button
                 onClick={() => setShowSecurityModal(true)}
@@ -437,7 +432,7 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => alert('হেড স্যারের তথ্য এডিট উইন্ডো চালু হয়েছে')}
+                onClick={() => alert('হেড স্যারের তথ্য এডিট')}
                 className="px-3 py-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 text-xs font-semibold flex items-center gap-1.5 transition"
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -471,14 +466,12 @@ export default function App() {
                 <span>লগআউট</span>
               </button>
             </div>
-
           </div>
         </div>
 
-        {/* 7. ADMIN TABS BAR (Clean pill tabs) */}
+        {/* এডমিন সাব-ট্যাব */}
         <div className="bg-white rounded-2xl border border-slate-200 p-2 shadow-sm">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none text-xs">
-            
             <button
               onClick={() => setAdminTab('student-entry')}
               className={`px-4 py-2.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-2 ${
@@ -550,15 +543,12 @@ export default function App() {
               <FileCheck2 className="w-4 h-4 text-indigo-400" />
               <span>দ্রুত ১-ক্লিক ভেরিফিকেশন তালিকা</span>
             </button>
-
           </div>
         </div>
 
-        {/* 8. TAB CONTENT 1: NEW STUDENT ADMISSION FORM (EXACT MATCH TO USER'S SCREENSHOT) */}
+        {/* শিক্ষার্থী ভর্তি ফরম ও ডেটাবেস টেবিল */}
         {adminTab === 'student-entry' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-            
-            {/* Form Title & Counter */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -575,19 +565,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* Input Form */}
             <form onSubmit={handleAddStudent} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                
-                {/* 1. Class */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    শ্রেণি *
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">শ্রেণি *</label>
                   <select
                     value={formData.studentClass}
                     onChange={(e) => setFormData({ ...formData, studentClass: e.target.value })}
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="৬ষ্ঠ শ্রেণি">৬ষ্ঠ শ্রেণি</option>
                     <option value="৭ম শ্রেণি">৭ম শ্রেণি</option>
@@ -597,15 +582,12 @@ export default function App() {
                   </select>
                 </div>
 
-                {/* 2. Section */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    শাখা (Section) *
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">শাখা (Section) *</label>
                   <select
                     value={formData.section}
                     onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="শাখা A">শাখা A</option>
                     <option value="শাখা B">শাখা B</option>
@@ -615,108 +597,85 @@ export default function App() {
                   </select>
                 </div>
 
-                {/* 3. Roll */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    রোল নম্বর *
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">রোল নম্বর *</label>
                   <input
                     type="number"
                     value={formData.roll}
                     onChange={(e) => setFormData({ ...formData, roll: e.target.value })}
                     placeholder="যেমন: ৩"
                     required
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* 4. Full Name */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    শিক্ষার্থীর পূর্ণ নাম *
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">শিক্ষার্থীর পূর্ণ নাম *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="যেমন: মোঃ সাকিবুল হাসান"
                     required
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* 5. Gender */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    লিঙ্গ (Gender) *
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">লিঙ্গ (Gender) *</label>
                   <select
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'male' | 'female' })}
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="male">👦 ছাত্র (ছেলে)</option>
                     <option value="female">👧 ছাত্রী (মেয়ে)</option>
                   </select>
                 </div>
 
-                {/* 6. Guardian Name */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    অভিভাবকের নাম
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">অভিভাবকের নাম</label>
                   <input
                     type="text"
                     value={formData.guardianName}
                     onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })}
                     placeholder="পিতা / মাতার নাম"
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* 7. Guardian Mobile */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    অভিভাবকের মোবাইল
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">অভিভাবকের মোবাইল</label>
                   <input
                     type="tel"
                     value={formData.guardianPhone}
                     onChange={(e) => setFormData({ ...formData, guardianPhone: e.target.value })}
                     placeholder="017XXXXXXXX"
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* 8. Monthly Fee */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    মাসিক বেতন (টাকা)
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">মাসিক বেতন (টাকা)</label>
                   <input
                     type="number"
                     value={formData.monthlyFee}
                     onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })}
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* 9. Exam Fee */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    পরীক্ষার ফি (টাকা)
-                  </label>
+                  <label className="text-xs font-bold text-slate-700">পরীক্ষার ফি (টাকা)</label>
                   <input
                     type="number"
                     value={formData.examFee}
                     onChange={(e) => setFormData({ ...formData, examFee: e.target.value })}
-                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/70 p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
               </div>
 
-              {/* Form Bottom Row: Auto Generated ID & Save Button */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
                 <div className="font-mono text-xs text-slate-500 bg-slate-100 px-3.5 py-2 rounded-lg border border-slate-200 flex items-center gap-2">
                   <span>আইডি জেনারেট হবে:</span>
@@ -735,14 +694,13 @@ export default function App() {
               </div>
             </form>
 
-            {/* Quick Students Registry Table */}
             <div className="pt-6 border-t border-slate-100 space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-600" />
                   সম্প্রতি নিবন্ধিত শিক্ষার্থী তালিকা ({students.length} জন)
                 </h4>
-                <span className="text-xs text-slate-400">অটো সেভ সক্রিয়</span>
+                <span className="text-xs text-slate-400">অটো সেভ সক্রিয়</span>
               </div>
 
               <div className="rounded-xl border border-slate-200 overflow-hidden overflow-x-auto shadow-xs">
@@ -781,11 +739,10 @@ export default function App() {
                 </table>
               </div>
             </div>
-
           </div>
         )}
 
-        {/* TAB 2: EXAM RESULTS */}
+        {/* অন্যান্য সাব-ট্যাব */}
         {adminTab === 'results' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -795,47 +752,28 @@ export default function App() {
             <p className="text-xs text-slate-500">
               ২০২৪ শিক্ষাবর্ষের অর্ধবার্ষিক ও বার্ষিক পরীক্ষার বিষয়ভিত্তিক নম্বর ইনপুট ও গ্রেড কার্ড প্রস্তুতকরণ।
             </p>
-            <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-3">
-              <FileSpreadsheet className="w-10 h-10 text-slate-400 mx-auto" />
-              <p className="text-xs text-slate-600 font-medium">
-                শ্রেণিভিত্তিক পরীক্ষার নম্বর এন্ট্রি উইন্ডো প্রস্তুত। শ্রেণি সিলেক্ট করে নম্বর ইনপুট দিন।
-              </p>
-              <button
-                onClick={() => alert('রেজাল্ট শিট জেনারেটর প্রস্তুত')}
-                className="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition shadow-sm"
-              >
-                রেজাল্ট শিট ডাউনলোড (PDF/Excel)
-              </button>
-            </div>
           </div>
         )}
 
-        {/* TAB 3: BANK FEES */}
         {adminTab === 'fees' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-emerald-600" />
               ব্যাংক ডিপোজিট স্লিপ ও অনলাইন ফি সমন্বয়
             </h3>
-            <p className="text-xs text-slate-500">
-              বাংলাদেশ কৃষি ব্যাংক ও আইএফআইসি ব্যাংক নাপোড়া বাজার শাখার ডিপোজিট স্লিপ ভেরিফিকেশন।
-            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                 <strong className="text-xs font-bold text-slate-800 block">বাংলাদেশ কৃষি ব্যাংক শাখা</strong>
                 <p className="text-xs text-slate-500">হিসাব নং: 0200018593402 • নাপোড়া বাজার শাখা, বাঁশখালী</p>
-                <div className="text-xs text-emerald-700 font-semibold">আজকের জমা: ৩৯,৫০০ ৳ (১৫টি স্লিপ)</div>
               </div>
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                 <strong className="text-xs font-bold text-slate-800 block">আইএফআইসি ব্যাংক পিএলসি</strong>
                 <p className="text-xs text-slate-500">হিসাব নং: 1042-8849-001 • নাপোড়া বাজার উপশাখা, বাঁশখালী</p>
-                <div className="text-xs text-emerald-700 font-semibold">আজকের জমা: ৫২,৩০০ ৳ (২১টি স্লিপ)</div>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 4: NOTICE PUBLISHER */}
         {adminTab === 'notice' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -846,20 +784,17 @@ export default function App() {
               <input
                 type="text"
                 placeholder="নোটিশের শিরোনাম লিখুন..."
-                className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50"
               />
               <textarea
                 rows={4}
                 placeholder="নোটিশের বিস্তারিত বিবরণ লিখুন..."
-                className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50"
               />
               <button
                 type="button"
-                onClick={() => {
-                  alert('নোটিশ সফলভাবে ওয়েবসাইটে প্রকাশিত হয়েছে!');
-                  setShowSuccessToast('নতুন নোটিশ ওয়েবসাইটে লাইভ করা হয়েছে');
-                }}
-                className="px-5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-2 transition shadow-sm"
+                onClick={() => setShowSuccessToast('নতুন নোটিশ ওয়েবসাইটে লাইভ করা হয়েছে')}
+                className="px-5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-2 transition"
               >
                 <Bell className="w-4 h-4" />
                 নোটিশ লাইভ পাবলিশ করুন
@@ -868,29 +803,12 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 5 & 6: ACCOUNTS & VERIFICATION */}
-        {(adminTab === 'accounts' || adminTab === 'verification') && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <FileCheck2 className="w-5 h-5 text-indigo-600" />
-              {adminTab === 'accounts' ? 'স্কুল আয়-ব্যয়ের ভাউচার হিসাব' : '১-ক্লিক ভেরিফিকেশন প্যানেল'}
-            </h3>
-            <p className="text-xs text-slate-500">
-              ডিজিটাল স্কুল ম্যানেজমেন্ট সিস্টেমের স্বয়ংক্রিয় অডিট ও রেকর্ড বুক।
-            </p>
-            <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
-              সকল রেকর্ড ডিজিটাল ডাটাবেসের সাথে সংযুক্ত রয়েছে।
-            </div>
-          </div>
-        )}
-
       </main>
 
-      {/* 9. FOOTER (CLEANED - NO DEVELOPER ZIP BUTTONS!) */}
+      {/* ৫. ফুটার (কোনো ডেভেলপার জিপ ফাইল বাটন ছাড়া) */}
       <footer className="bg-[#0b192c] text-slate-300 border-t border-slate-800 mt-12 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 md:grid-cols-12 gap-8">
           
-          {/* Col 1: School Identity */}
           <div className="md:col-span-5 space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-400 to-rose-600 p-0.5 shadow-md shrink-0">
@@ -913,7 +831,6 @@ export default function App() {
             </p>
           </div>
 
-          {/* Col 2: Quick Links */}
           <div className="md:col-span-4 space-y-2.5">
             <h5 className="font-bold text-amber-400 text-xs uppercase tracking-wider">
               দ্রুত নেভিগেশন
@@ -921,18 +838,13 @@ export default function App() {
             <div className="grid grid-cols-2 gap-1.5 text-xs text-slate-400">
               <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">হোম</a>
               <a href="#about" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">আমাদের সম্পর্কে</a>
-              <a href="#founder" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">প্রতিষ্ঠাতা ও দাতা</a>
-              <a href="#committee" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">পরিচালনা পর্ষদ</a>
               <a href="#teachers" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">শিক্ষক ফোরাম</a>
-              <a href="#staff" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">কর্মচারী তথ্য</a>
               <a href="#students" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">শিক্ষার্থীর তথ্য</a>
-              <a href="#assembly" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">প্রাত্যহিক সমাবেশ</a>
               <a href="#gallery" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">ফটো ও ভিডিও গ্যালারি</a>
               <a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentView('public'); }} className="hover:text-white transition">যোগাযোগ</a>
             </div>
           </div>
 
-          {/* Col 3: Bank Fee Deposition Branches */}
           <div className="md:col-span-3 space-y-3">
             <h5 className="font-bold text-amber-400 text-xs uppercase tracking-wider">
               ফি জমা শাখা
@@ -951,7 +863,6 @@ export default function App() {
 
         </div>
 
-        {/* Bottom Copyright Bar */}
         <div className="border-t border-slate-800 py-3.5 px-4 sm:px-6 bg-[#081424] text-[11px] text-slate-400">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div>
@@ -968,7 +879,7 @@ export default function App() {
         </div>
       </footer>
 
-      {/* ONLINE ADMISSION APPLICATION MODAL */}
+      {/* ভর্তি আবেদন মডাল */}
       {showAdmissionModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4">
@@ -1027,7 +938,7 @@ export default function App() {
         </div>
       )}
 
-      {/* SECURITY MODAL */}
+      {/* সিকিউরিটি মডাল */}
       {showSecurityModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-2xl space-y-4">
@@ -1056,9 +967,6 @@ export default function App() {
                   readOnly
                 />
               </div>
-              <p className="text-[11px] text-slate-500">
-                প্রশাসনিক পরিবর্তনের জন্য ২-ফ্যাক্টর অথেনটিকেশন সক্রিয় রয়েছে।
-              </p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
