@@ -42,6 +42,28 @@
   display: none;
 }
 
+/* Smooth Slow-Motion Continuous Marquee Ticker */
+@keyframes tickerSlow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-ticker-slow {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: tickerSlow var(--ticker-duration, 35s) linear infinite;
+  will-change: transform;
+}
+
+.animate-ticker-slow:hover,
+.ticker-container:hover .animate-ticker-slow {
+  animation-play-state: paused !important;
+}
+
 @media print {
   body {
     background-color: #ffffff !important;

@@ -78,12 +78,12 @@ export default function AboutTab({
 
           {/* Monogram Badge Card */}
           <div className="shrink-0 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#f0f6f6] to-[#e4eff0] border-2 border-[#d2e5e7] rounded-3xl text-center shadow-xs">
+            <div className="mb-2.5 text-base sm:text-lg font-black text-[#d9482b] italic tracking-wide">
+              "পড় স্রষ্টার নামে"
+            </div>
             <SchoolLogo size={140} className="drop-shadow-md hover:scale-105 transition-transform" />
             <div className="mt-3 text-sm font-bold text-slate-900">
               {language === 'bn' ? 'বিদ্যালয়ের অফিশিয়াল মনোগ্রাম' : 'Official School Emblem'}
-            </div>
-            <div className="text-xs text-[#d9482b] font-bold italic mt-0.5">
-              "পড় স্রষ্টার নামে"
             </div>
             <div className="text-[11px] text-slate-600 font-semibold mt-1">
               {language === 'bn' ? 'স্থাপিত : ১৯৬৪ ইং · বাঁশখালী, চট্টগ্রাম' : 'Est. 1964 · Banshkhali, Chattogram'}

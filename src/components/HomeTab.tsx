@@ -20,7 +20,12 @@ import {
   User,
   TrendingUp,
   UserCheck,
-  MessageSquare
+  MessageSquare,
+  Image as ImageIcon,
+  Video,
+  Play,
+  Sun,
+  Flag
 } from 'lucide-react';
 import SchoolLogo from './SchoolLogo';
 import HeadmasterPortrait from './HeadmasterPortrait';
@@ -165,17 +170,18 @@ export default function HomeTab({
           <div className="lg:col-span-4 bg-[#082545] border-2 border-amber-400/60 p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-400/5 to-transparent pointer-events-none" />
             
+            {/* Motto / Slogan above the logo in prominent, large font as requested */}
+            <div className="mb-3 text-lg sm:text-xl font-black text-amber-300 italic tracking-wider drop-shadow-md">
+              "পড় স্রষ্টার নামে"
+            </div>
+
             <div className="relative">
               <div className="absolute -inset-1.5 bg-amber-400/20 rounded-full blur-sm group-hover:bg-amber-400/30 transition-all" />
               <SchoolLogo size={130} className="relative drop-shadow-lg group-hover:scale-105 transition-transform" />
             </div>
 
-            <div className="mt-3 text-base font-extrabold text-white tracking-wide">
+            <div className="mt-3 text-base sm:text-lg font-extrabold text-white tracking-wide">
               {language === 'bn' ? 'নাপোড়া শেখেরখীল উচ্চ বিদ্যালয়' : 'Napora Shekherkhil High School'}
-            </div>
-            
-            <div className="text-xs text-amber-300 font-bold italic mt-1">
-              "পড় স্রষ্টার নামে"
             </div>
             
             <div className="text-[11px] text-slate-300 mt-1.5">
@@ -724,6 +730,217 @@ export default function HomeTab({
             >
               সম্পূর্ণ নোটিশ বোর্ড দেখুন →
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Morning Assembly Showcase on Homepage */}
+      <div className="bg-gradient-to-br from-[#082545] to-[#0c3664] text-white border border-[#144275] rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden space-y-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+          <div className="space-y-4 max-w-xl">
+            <div className="inline-flex items-center gap-2 bg-[#d9482b] text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-xs">
+              <Sun className="w-4 h-4 text-amber-300" />
+              <span>{language === 'bn' ? 'প্রাত্যহিক সমাবেশ (Daily Assembly)' : 'Daily Morning Assembly'}</span>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black text-white leading-tight">
+              {language === 'bn'
+                ? 'বিদ্যালয়ের প্রাত্যহিক সমাবেশ — নিয়মানুবর্তিতা ও ঐক্যের সূচনা'
+                : 'School Morning Assembly — Discipline & Patriotism'}
+            </h2>
+
+            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              {language === 'bn'
+                ? 'প্রতিটি শিক্ষাদিবসের শুরুতে পবিত্র ধর্মগ্রন্থ থেকে পাঠ, জাতীয় পতাকা উত্তোলন, জাতীয় সংগীত সমস্বরে পরিবেশন, শিক্ষার্থীদের পবিত্র শপথ বাক্য এবং শারীরিক কসরতের মাধ্যমে সমাবেশ অনুষ্ঠিত হয়।'
+                : 'Every school day commences with holy scripture recitation, national flag salute, national anthem, student oath, and physical exercise.'}
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-xl flex items-center gap-2">
+                <Flag className="w-4 h-4 text-rose-400 shrink-0" />
+                <span className="font-semibold truncate">জাতীয় পতাকা ও সংগীত</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-xl flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="font-semibold truncate">শিক্ষার্থীদের শপথ বাক্য</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-xl flex items-center gap-2">
+                <Sun className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="font-semibold truncate">দৈনিক পিটি ও ড্রিল</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-xl flex items-center gap-2">
+                <Users className="w-4 h-4 text-cyan-300 shrink-0" />
+                <span className="font-semibold truncate">স্কাউট ও শিক্ষক দল</span>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('assembly')}
+                className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
+              >
+                <span>{language === 'bn' ? 'সমাবেশ রুটিন, শপথ ও পূর্ণ অ্যালবাম দেখুন' : 'View Routine, Oath & Photos'}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Authentic Assembly Photo Thumbnail */}
+          <div
+            onClick={() => setActiveTab('assembly')}
+            className="w-full lg:w-80 group cursor-pointer rounded-2xl overflow-hidden border-2 border-amber-400/50 shadow-xl bg-slate-900 shrink-0"
+          >
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <img
+                src="/assets/aistudio/image_e9445d3b.png"
+                alt="প্রাত্যহিক সমাবেশ"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex flex-col justify-end p-3">
+                <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded w-fit mb-1">
+                  বাস্তব সমাবেশ দৃশ্য
+                </span>
+                <p className="text-xs font-bold text-white leading-tight">
+                  নাপোড়া শেখেরখীল উচ্চ বিদ্যালয় খেলার মাঠ
+                </p>
+                <p className="text-[10px] text-amber-300 mt-0.5 group-hover:underline flex items-center gap-1">
+                  <span>ক্লিক করে বিস্তারিত দেখুন</span>
+                  <ChevronRight className="w-3 h-3" />
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Gallery Showcase Teaser on Homepage */}
+      <div className="bg-white border border-[#d9e6e7] rounded-3xl p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-[#0c3664] flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-amber-500" />
+              <span>বিদ্যালয়ের ফটো ও ভিডিও গ্যালারি</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              বিভিন্ন অনুষ্ঠান, বার্ষিক ক্রীড়া প্রতিযোগিতা, জাতীয় দিবস ও ক্যাম্পাস জীবনের স্মরণীয় চিত্রমালা
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('gallery')}
+            className="px-4 py-2 bg-[#0c3664] hover:bg-[#092b50] text-amber-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+          >
+            <span>সম্পূর্ণ গ্যালারি দেখুন</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Item 1 */}
+          <div
+            onClick={() => setActiveTab('gallery')}
+            className="group rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 hover:border-[#0c3664] transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+          >
+            <div className="aspect-video relative overflow-hidden bg-slate-900">
+              <img
+                src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80"
+                alt="ক্রীড়া প্রতিযোগিতা"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-[#0c3664]/90 text-white backdrop-blur-xs">
+                ক্রীড়া প্রতিযোগিতা
+              </span>
+            </div>
+            <div className="p-3">
+              <div className="text-xs font-bold text-slate-900 group-hover:text-[#0c3664] truncate">
+                বার্ষিক ক্রীড়া ও সাংস্কৃতিক সপ্তাহ
+              </div>
+              <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                দৌড়, দীর্ঘ লম্ফ ও পুরস্কার বিতরণী
+              </div>
+            </div>
+          </div>
+
+          {/* Item 2 */}
+          <div
+            onClick={() => setActiveTab('gallery')}
+            className="group rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 hover:border-[#0c3664] transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+          >
+            <div className="aspect-video relative overflow-hidden bg-slate-900">
+              <img
+                src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+                alt="স্বাধীনতা দিবস"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white flex items-center gap-1">
+                <Video className="w-3 h-3" />
+                <span>ভিডিও</span>
+              </span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-red-600/90 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                  <Play className="w-5 h-5 fill-white ml-0.5" />
+                </div>
+              </div>
+            </div>
+            <div className="p-3">
+              <div className="text-xs font-bold text-slate-900 group-hover:text-[#0c3664] truncate">
+                মহান স্বাধীনতা ও জাতীয় দিবস উদযাপন
+              </div>
+              <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                পতাকা উত্তোলন ও বিশেষ কুচকাওয়াজ
+              </div>
+            </div>
+          </div>
+
+          {/* Item 3 */}
+          <div
+            onClick={() => setActiveTab('gallery')}
+            className="group rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 hover:border-[#0c3664] transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+          >
+            <div className="aspect-video relative overflow-hidden bg-slate-900">
+              <img
+                src="https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&q=80"
+                alt="বিজ্ঞান মেলা"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white">
+                বিজ্ঞান মেলা
+              </span>
+            </div>
+            <div className="p-3">
+              <div className="text-xs font-bold text-slate-900 group-hover:text-[#0c3664] truncate">
+                আন্তঃশ্রেণি বিজ্ঞান ও রোবোটিক্স মেলা
+              </div>
+              <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                উদ্ভাবনী মডেল ও জলবায়ু প্রকল্প
+              </div>
+            </div>
+          </div>
+
+          {/* Item 4 */}
+          <div
+            onClick={() => setActiveTab('gallery')}
+            className="group rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 hover:border-[#0c3664] transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+          >
+            <div className="aspect-video relative overflow-hidden bg-slate-900">
+              <img
+                src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80"
+                alt="ক্যাম্পাস"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-600 text-white">
+                ক্যাম্পাস
+              </span>
+            </div>
+            <div className="p-3">
+              <div className="text-xs font-bold text-slate-900 group-hover:text-[#0c3664] truncate">
+                সুদৃশ্য ক্যাম্পাস ও একাডেমি ভবন
+              </div>
+              <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                ১৯৬৪ সালে প্রতিষ্ঠিত ঐতিহ্যবাহী বিদ্যাপীঠ
+              </div>
+            </div>
           </div>
         </div>
       </div>

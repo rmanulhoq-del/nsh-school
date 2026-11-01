@@ -215,11 +215,13 @@ export type NavTab =
   | 'home'
   | 'notices'
   | 'about'
+  | 'assembly'
   | 'committee'
   | 'donors'
   | 'teachers'
   | 'staff'
   | 'students'
+  | 'gallery'
   | 'attendance'
   | 'exams'
   | 'sms'
@@ -231,6 +233,18 @@ export type NavTab =
   | 'office'
   | 'ai'
   | 'contact';
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  category: 'sports' | 'cultural' | 'national' | 'science' | 'campus' | 'academic' | 'general';
+  type: 'image' | 'video';
+  mediaUrl: string;
+  youtubeId?: string;
+  date: string;
+  description: string;
+  isFeatured?: boolean;
+}
 
 export interface HeadmasterData {
   name: string;
