@@ -521,8 +521,10 @@ export default function App() {
         {/* Tier 1: Top Info Bar (Desktop only) */}
         <div className="bg-[#082545] border-b border-[#144275] text-slate-300 text-xs hidden md:block">
           <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-slate-300 font-medium">বাঁশখালী, চট্টগ্রাম · ইআইআইএন: ১০৪০৬২ · স্থাপিত: ১৯৬৪ ইং</span>
+           <div className="flex items-center gap-3 shrink-0">
+              <span className="text-slate-300 font-medium">
+                {language === 'bn' ? 'ইআইআইএন: ১০৪০৬২' : 'EIIN: 104062'}
+              </span>
             </div>
 
             <div className="flex items-center gap-3 text-[11px] shrink-0">
