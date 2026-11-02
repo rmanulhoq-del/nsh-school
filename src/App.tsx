@@ -1267,7 +1267,7 @@ export default function App() {
                   {language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('gallery')} className="hover:text-amber-300 text-left font-bold text-amber-200">
-                  {language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Gallery'}
+                  {language === 'bn' ? 'ফটো গ্যালারি' : 'Gallery'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('parents')} className="hover:text-white text-left">
                   {language === 'bn' ? 'অভিভাবক কলাম' : 'Parents'}
