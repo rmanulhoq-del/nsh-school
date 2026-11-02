@@ -873,7 +873,7 @@ export default function App() {
 
         {/* Tier 3: Horizontal Swipeable Nav Strip (Zero-overlap guaranteed) */}
         <nav className="bg-[#092b50] border-t border-[#134377] w-full">
-          <div className="max-w-7xl mx-auto px-2 sm:px-6 py-1.5 w-full flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 w-full flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x">
             {navTabsList.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
