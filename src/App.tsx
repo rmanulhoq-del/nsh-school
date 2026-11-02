@@ -39,9 +39,7 @@ import {
   Check,
   TrendingUp,
   Image as ImageIcon,
-  Sun,
-  Download,
-  FolderArchive
+  Sun
 } from 'lucide-react';
 
 import SchoolLogo from './components/SchoolLogo';
@@ -528,29 +526,6 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-3 text-[11px] shrink-0">
-              {/* Direct Drag & Drop Download Links */}
-              <a
-                href="/school-portal-production-build.zip"
-                download="school-portal-production-build.zip"
-                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-2.5 py-0.5 rounded flex items-center gap-1 transition-all shadow-xs"
-                title="ড্র্যাগ এন্ড ড্রপ করার জন্য প্রডাকশন বিল্ড জিপ ফাইল ডাউনলোড করুন"
-              >
-                <Download className="w-3 h-3 text-slate-950" />
-                <span>ড্র্যাগ & ড্রপ জিপ</span>
-              </a>
-
-              <a
-                href="/school-portal-source-code.zip"
-                download="school-portal-source-code.zip"
-                className="bg-[#144275] hover:bg-[#1d5796] text-amber-200 hover:text-white px-2 py-0.5 rounded border border-amber-400/30 flex items-center gap-1 transition-colors"
-                title="সম্পূর্ণ সোর্স কোড জিপ ফাইল ডাউনলোড করুন"
-              >
-                <FolderArchive className="w-3 h-3 text-cyan-300" />
-                <span>সোর্স কোড জিপ</span>
-              </a>
-
-              <span aria-hidden="true" className="text-slate-500">·</span>
-
               <div className="flex items-center bg-[#051c36] rounded-md p-0.5 border border-[#1d4c82]">
                 <button
                   type="button"
@@ -595,9 +570,14 @@ export default function App() {
                 setActiveTab('home');
                 setIsMobileMenuOpen(false);
               }}
-              className="flex items-center gap-2 cursor-pointer min-w-0"
+              className="flex items-center gap-2.5 cursor-pointer min-w-0"
             >
-              <SchoolLogo size={42} className="shadow-md shrink-0 w-10 h-10" />
+              <div className="flex flex-col items-center shrink-0">
+                <span className="text-[9px] font-black text-amber-300 italic leading-none mb-0.5">
+                  "পড় স্রষ্টার নামে"
+                </span>
+                <SchoolLogo size={42} className="shadow-md shrink-0 w-10 h-10" />
+              </div>
               <div className="min-w-0">
                 <div className="text-[14px] sm:text-base font-extrabold text-white leading-tight truncate">
                   {language === 'bn' ? 'নাপোড়া শেখেরখীল উচ্চ বিদ্যালয়' : 'Napora Shekherkhil High School'}
@@ -702,9 +682,14 @@ export default function App() {
         <div className="hidden md:flex max-w-7xl mx-auto px-6 min-h-[5.5rem] py-3 items-center justify-between gap-6">
           <div
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-3.5 cursor-pointer shrink-0 group"
+            className="flex items-center gap-4 cursor-pointer shrink-0 group"
           >
-            <SchoolLogo size={58} className="shadow-md group-hover:scale-105 transition-transform shrink-0" />
+            <div className="flex flex-col items-center shrink-0">
+              <span className="text-xs font-black text-amber-300 italic tracking-wider leading-none mb-1 drop-shadow-xs">
+                "পড় স্রষ্টার নামে"
+              </span>
+              <SchoolLogo size={58} className="shadow-md group-hover:scale-105 transition-transform" />
+            </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-tight">
@@ -1330,33 +1315,6 @@ export default function App() {
                 <div>
                   <div className="font-semibold text-white">আইএফআইসি ব্যাংক পিএলসি</div>
                   <div className="text-[11px] text-slate-400">নাপোড়া বাজার উপশাখা, বাঁশখালী</div>
-                </div>
-              </div>
-
-              {/* Direct Download & Deploy Section */}
-              <div className="pt-3 border-t border-[#144275] space-y-1.5">
-                <div className="text-[11px] font-bold text-amber-300">
-                  {language === 'bn' ? 'ডিপ্লয়মেন্ট জিপ ফাইল:' : 'Deployment Archives:'}
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <a
-                    href="/school-portal-production-build.zip"
-                    download="school-portal-production-build.zip"
-                    className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-                    title="ড্র্যাগ এন্ড ড্রপ করার জন্য প্রডাকশন বিল্ড জিপ ফাইল ডাউনলোড করুন"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>ড্র্যাগ & ড্রপ জিপ ফাইল</span>
-                  </a>
-                  <a
-                    href="/school-portal-source-code.zip"
-                    download="school-portal-source-code.zip"
-                    className="bg-[#082545] hover:bg-[#144275] border border-amber-400/30 text-amber-200 hover:text-white px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
-                    title="সম্পূর্ণ সোর্স কোড জিপ ফাইল ডাউনলোড করুন"
-                  >
-                    <FolderArchive className="w-3.5 h-3.5 text-cyan-300" />
-                    <span>সম্পূর্ণ সোর্স কোড জিপ</span>
-                  </a>
                 </div>
               </div>
             </div>
