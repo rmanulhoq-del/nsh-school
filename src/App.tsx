@@ -516,13 +516,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f0f6f6] text-slate-900 flex flex-col font-sans selection:bg-[#0d3b66] selection:text-white">
-      {/* HEADER */}
+     {/* HEADER */}
       <header className="bg-[#0c3664] text-white border-b-2 border-[#d9482b] sticky top-0 z-40 shadow-md">
         {/* Tier 1: Top Info Bar (Desktop only) */}
         <div className="bg-[#082545] border-b border-[#144275] text-slate-300 text-xs hidden md:block">
           <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 shrink-0">
-              <span className="text-amber-300 font-bold tracking-wide italic">"পড় স্রষ্টার নামে"</span>
+              <span className="text-slate-300 font-medium">বাঁশখালী, চট্টগ্রাম · ইআইআইএন: ১০৪০৬২ · স্থাপিত: ১৯৬৪ ইং</span>
             </div>
 
             <div className="flex items-center gap-3 text-[11px] shrink-0">
@@ -546,17 +546,6 @@ export default function App() {
                   English
                 </button>
               </div>
-
-              <span aria-hidden="true" className="text-slate-500">·</span>
-              <button
-                type="button"
-                onClick={handleResetDemoData}
-                className="text-amber-300 hover:text-white flex items-center gap-1 transition-colors"
-                title="ডেমো ডেটা রিসেট"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>{language === 'bn' ? 'রিসেট ডেমো' : 'Reset'}</span>
-              </button>
             </div>
           </div>
         </div>
@@ -572,10 +561,7 @@ export default function App() {
               }}
               className="flex items-center gap-2.5 cursor-pointer min-w-0"
             >
-              <div className="flex flex-col items-center shrink-0">
-                <span className="text-[9px] font-black text-amber-300 italic leading-none mb-0.5">
-                  "পড় স্রষ্টার নামে"
-                </span>
+              <div className="flex items-center shrink-0">
                 <SchoolLogo size={42} className="shadow-md shrink-0 w-10 h-10" />
               </div>
               <div className="min-w-0">
@@ -684,10 +670,7 @@ export default function App() {
             onClick={() => setActiveTab('home')}
             className="flex items-center gap-4 cursor-pointer shrink-0 group"
           >
-            <div className="flex flex-col items-center shrink-0">
-              <span className="text-xs font-black text-amber-300 italic tracking-wider leading-none mb-1 drop-shadow-xs">
-                "পড় স্রষ্টার নামে"
-              </span>
+            <div className="flex items-center shrink-0">
               <SchoolLogo size={58} className="shadow-md group-hover:scale-105 transition-transform" />
             </div>
             <div>
@@ -882,15 +865,6 @@ export default function App() {
                   <span>অফিস ডেস্ক</span>
                 </button>
               )}
-
-              <button
-                type="button"
-                onClick={handleResetDemoData}
-                className="text-amber-300 hover:text-white flex items-center gap-1 text-[11px] font-semibold"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>রিসেট</span>
-              </button>
             </div>
           </div>
         )}
