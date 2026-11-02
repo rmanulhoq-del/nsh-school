@@ -502,7 +502,7 @@ export default function App() {
     { id: 'staff', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: ShieldCheck },
     { id: 'students', label: language === 'bn' ? 'শিক্ষার্থী ও ভর্তি' : 'Students & Admission', icon: GraduationCap },
     { id: 'assembly', label: language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly', icon: Sun },
-    { id: 'gallery', label: language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
+    { id: 'gallery', label: language === 'bn' ? 'ফটো গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
     { id: 'parents', label: language === 'bn' ? 'অভিভাবক কলাম' : 'Parents Column', icon: MessageCircle },
     { id: 'notices', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell },
     { id: 'attendance', label: language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance', icon: UserCheck },
