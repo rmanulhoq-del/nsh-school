@@ -613,27 +613,27 @@ export default function App() {
   };
 
   const navTabsList = [
-    { id: 'home', label: language === 'bn' ? 'হোম' : 'Home', icon: Home },
-    { id: 'about', label: language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us', icon: Info },
-    { id: 'notices', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell },
-    { id: 'contact', label: language === 'bn' ? 'যোগাযোগ' : 'Contact', icon: Phone },
-    { id: 'students', label: language === 'bn' ? 'শিক্ষার্থী ও ভর্তি' : 'Students & Admission', icon: GraduationCap },
-    { id: 'attendance', label: language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance', icon: UserCheck },
-    { id: 'exams', label: language === 'bn' ? 'পরীক্ষা ও ফলাফল' : 'Exams & Results', icon: Award },
-    { id: 'banks', label: language === 'bn' ? 'ফি ও আয়-ব্যয় হিসাব' : 'Fees & Accounts', icon: Landmark },
-    { id: 'teachers', label: language === 'bn' ? 'শিক্ষক ফোরাম' : "Teachers' Forum", icon: Users },
-    { id: 'staff', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: ShieldCheck },
-    { id: 'committee', label: language === 'bn' ? 'পরিচালনা পর্ষদ' : 'Managing Committee', icon: Award },
-    { id: 'donors', label: language === 'bn' ? 'প্রতিষ্ঠাতা ও দাতা ফোরাম' : 'Founders & Donors', icon: HeartHandshake },
-    { id: 'edulinks', label: language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক' : 'Edu Portal Links', icon: Globe },
-    { id: 'gallery', label: language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
-    { id: 'assembly', label: language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly', icon: Sun },
-    { id: 'parents', label: language === 'bn' ? 'অভিভাবকের কলাম' : "Parents' Column", icon: MessageCircle },
-    { id: 'sms', label: language === 'bn' ? 'SMS গেটওয়ে' : 'SMS Gateway', icon: MessageCircle },
-    { id: 'reports', label: language === 'bn' ? 'মাসিক ও বাৎসরিক রিপোর্ট' : 'Reports', icon: TrendingUp },
-    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles },
-    { id: 'office', label: language === 'bn' ? 'অফিস ডেস্ক ও ইনপুট' : 'Office Desk', icon: ShieldCheck },
-    { id: 'ai', label: language === 'bn' ? 'AI স্ক্যানার ও বাল্ক ইম্পোর্ট' : 'AI Scanner & Bulk Import', icon: Sparkles }
+    { id: 'home', serial: '০১', label: language === 'bn' ? 'হোম' : 'Home', icon: Home, category: 'মূল প্রতিষ্ঠান ও পরিচিতি' },
+    { id: 'about', serial: '০২', label: language === 'bn' ? 'আমাদের সম্পর্কে (বিস্তারিত বিবরণ)' : 'About Us', icon: Info, category: 'মূল প্রতিষ্ঠান ও পরিচিতি' },
+    { id: 'committee', serial: '০৩', label: language === 'bn' ? 'বিদ্যালয় পরিচালনা কমিটি' : 'Managing Committee', icon: Award, category: 'মূল প্রতিষ্ঠান ও পরিচিতি' },
+    { id: 'donors', serial: '০৪', label: language === 'bn' ? 'প্রতিষ্ঠাতা ও দাতা ফোরাম' : 'Founders & Donors', icon: HeartHandshake, category: 'মূল প্রতিষ্ঠান ও পরিচিতি' },
+    { id: 'students', serial: '০৫', label: language === 'bn' ? 'শিক্ষার্থী তথ্য ডিরেক্টরি' : 'Students Directory', icon: GraduationCap, category: 'শিক্ষার্থী ও একাডেমিক' },
+    { id: 'exams', serial: '০৬', label: language === 'bn' ? 'পরীক্ষা ও ফলাফল' : 'Exams & Results', icon: Award, category: 'শিক্ষার্থী ও একাডেমিক' },
+    { id: 'assembly', serial: '০৭', label: language === 'bn' ? 'প্রাত্যহিক সমাবেশ ও শপথ' : 'Daily Assembly', icon: Sun, category: 'শিক্ষার্থী ও একাডেমিক' },
+    { id: 'teachers', serial: '০৮', label: language === 'bn' ? 'শিক্ষক ফোরাম (শিক্ষকমণ্ডলী)' : "Teachers' Forum", icon: Users, category: 'শিক্ষক ও কর্মচারী ফোরাম' },
+    { id: 'staff', serial: '০৯', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: ShieldCheck, category: 'শিক্ষক ও কর্মচারী ফোরাম' },
+    { id: 'attendance', serial: '১০', label: language === 'bn' ? 'দৈনিক ডিজিটাল হাজিরা' : 'Attendance', icon: UserCheck, category: 'প্রাত্যহিক কার্যক্রম ও প্রশাসন' },
+    { id: 'banks', serial: '১১', label: language === 'bn' ? 'ফি ও আয়-ব্যয় হিসাব (ব্যাংক)' : 'Fees & Accounts', icon: Landmark, category: 'প্রাত্যহিক কার্যক্রম ও প্রশাসন' },
+    { id: 'notices', serial: '১২', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell, category: 'প্রাত্যহিক কার্যক্রম ও প্রশাসন' },
+    { id: 'contact', serial: '১৩', label: language === 'bn' ? 'যোগাযোগ ও অবস্থান' : 'Contact', icon: Phone, category: 'প্রাত্যহিক কার্যক্রম ও প্রশাসন' },
+    { id: 'parents', serial: '১৪', label: language === 'bn' ? 'অভিভাবকের কলাম' : "Parents' Column", icon: MessageCircle, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'gallery', serial: '১৫', label: language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'edulinks', serial: '১৬', label: language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক' : 'Edu Portal Links', icon: Globe, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'sms', serial: '১৭', label: language === 'bn' ? 'স্মার্ট SMS গেটওয়ে' : 'SMS Gateway', icon: MessageCircle, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'reports', serial: '১৮', label: language === 'bn' ? 'মাসিক ও বাৎসরিক রিপোর্ট' : 'Reports', icon: TrendingUp, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'excellence', serial: '১৯', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles, category: 'অন্যান্য সেবা ও সুবিধা' },
+    { id: 'office', serial: '২০', label: language === 'bn' ? 'অফিস ডেস্ক ও ইনপুট' : 'Office Desk', icon: ShieldCheck, category: 'এডমিন ও ডাটা এন্ট্রি' },
+    { id: 'ai', serial: '২১', label: language === 'bn' ? 'AI স্ক্যানার ও বাল্ক ডাটা' : 'AI Scanner & Bulk Import', icon: Sparkles, category: 'এডমিন ও ডাটা এন্ট্রি' }
   ];
 
   return (
@@ -827,54 +827,86 @@ export default function App() {
           <div className="flex items-center gap-2 shrink-0">
             {currentAdmin ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 bg-[#061d36] border border-amber-400/50 px-2.5 py-1.5 rounded-lg text-xs shadow-xs">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <div className="text-left hidden lg:block">
-                    <div className="text-[10px] text-amber-300 font-bold leading-none flex items-center gap-1">
+                {/* 1. Admin Badge (Height 40px / h-10) */}
+                <div className="h-10 flex items-center gap-2 bg-[#061d36] border border-amber-400/50 px-3 rounded-xl text-xs shadow-xs">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <div className="text-left hidden lg:block leading-tight">
+                    <div className="text-[10px] text-amber-300 font-bold flex items-center gap-1">
                       <span>অথরাইজড এডমিন</span>
-                      <span className="text-[9px] bg-amber-400/20 text-amber-200 px-1 rounded">{currentAdmin.roleName}</span>
+                      <span className="text-[9px] bg-amber-400/20 text-amber-200 px-1 py-0.5 rounded font-medium">{currentAdmin.roleName}</span>
                     </div>
-                    <div className="text-white font-semibold text-xs leading-tight truncate max-w-[130px]">
+                    <div className="text-white font-semibold text-xs truncate max-w-[125px]">
                       {currentAdmin.name}
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowAdminLoginModal(true)}
-                    className="px-2 py-0.5 bg-[#144275] hover:bg-[#1d5796] text-amber-200 hover:text-white rounded text-[10px] font-bold transition-colors ml-1"
+                    className="h-6 px-2 bg-[#144275] hover:bg-[#1d5796] text-amber-200 hover:text-white rounded-md text-[10px] font-bold transition-colors ml-0.5 shrink-0 flex items-center justify-center cursor-pointer"
                     title="অন্য কর্মকর্তার একাউন্টে সুইচ করুন"
                   >
                     {language === 'bn' ? 'সুইচ' : 'Switch'}
                   </button>
                 </div>
 
+                {/* 2. Office Desk Button (Directly next to Admin - Never overflows to the right) */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('office')}
+                  className={`h-10 px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+                    activeTab === 'office'
+                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm ring-2 ring-amber-300/40'
+                      : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
+                  }`}
+                  title="এডমিন ইনপুট ও অফিস ডেস্ক (ডিফল্ট পিন: ১২৩৪)"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office Desk'}</span>
+                </button>
+
+                {/* 3. Users & Security Button (Height 40px / h-10) */}
                 <button
                   type="button"
                   onClick={() => setShowAdminUsersModal(true)}
-                  className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-lg text-xs font-extrabold transition-all shadow-xs flex items-center gap-1.5"
+                  className="h-10 px-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                   title="এডমিন একাউন্ট যোগ, এডিট, ডিলিট ও পাসওয়ার্ড পরিবর্তন"
                 >
-                  <Users className="w-3.5 h-3.5 text-slate-950" />
+                  <Users className="w-4 h-4 text-slate-950 shrink-0" />
                   <span className="hidden sm:inline">ইউজার ও সিকিউরিটি</span>
                 </button>
 
+                {/* 4. Apply Now / ভর্তি আবেদন Button (Height 40px / h-10) */}
+                <button
+                  type="button"
+                  onClick={() => setShowAdmissionModal(true)}
+                  className="h-10 px-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
+                  title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
+                >
+                  <UserPlus className="w-4 h-4 text-white shrink-0" />
+                  <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
+                </button>
+
+                {/* 5. Public View Button (Height 40px / h-10) */}
                 <button
                   type="button"
                   onClick={handleAdminLogout}
-                  className="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 border border-rose-400/50"
+                  className="h-10 px-3 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-rose-400/50 shrink-0 cursor-pointer"
                   title="এডমিন মোড বন্ধ করে সাধারণ দর্শক বা ভিজিটর হিসেবে ওয়েবসাইট দেখতে এখানে ক্লিক করুন"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-4 h-4 shrink-0" />
                   <span>পাবলিক ভিউ</span>
-                  <LogOut className="w-3 h-3 text-rose-200" />
+                  <LogOut className="w-3.5 h-3.5 text-rose-200 shrink-0" />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-[11px] bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                {/* Public Mode Badge (Height 40px / h-10) */}
+                <div className="h-10 flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 px-3 rounded-xl text-xs font-medium shrink-0">
+                  <Eye className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>পাবলিক মোড</span>
-                </span>
+                </div>
+
+                {/* Admin Login Button (Height 40px / h-10) */}
                 <button
                   type="button"
                   onClick={() => {
@@ -882,70 +914,39 @@ export default function App() {
                     setLoginError('');
                     setShowAdminLoginModal(true);
                   }}
-                  className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-lg text-xs font-extrabold transition-all shadow-xs flex items-center gap-1.5"
+                  className="h-10 px-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                 >
-                  <Lock className="w-3.5 h-3.5 text-slate-950" />
+                  <Lock className="w-4 h-4 text-slate-950 shrink-0" />
                   <span>{language === 'bn' ? 'এডমিন লগইন' : 'Admin Login'}</span>
+                </button>
+
+                {/* Office Desk Button in Public Mode (Height 40px / h-10) */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('office')}
+                  className={`h-10 px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+                    activeTab === 'office'
+                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm ring-2 ring-amber-300/40'
+                      : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
+                  }`}
+                  title="এডমিন ইনপুট ও অফিস ডেস্ক (ডিফল্ট পিন: ১২৩৪)"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office Desk'}</span>
+                </button>
+
+                {/* Apply Now Button in Public Mode (Height 40px / h-10) */}
+                <button
+                  type="button"
+                  onClick={() => setShowAdmissionModal(true)}
+                  className="h-10 px-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
+                  title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
+                >
+                  <UserPlus className="w-4 h-4 text-white shrink-0" />
+                  <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
                 </button>
               </div>
             )}
-
-            {/* Apply Now / ভর্তি আবেদন Button (Matches user reference design) */}
-            <button
-              type="button"
-              onClick={() => setShowAdmissionModal(true)}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-black transition-all shadow-xs flex items-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95"
-              title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
-            >
-              <UserPlus className="w-3.5 h-3.5 text-white" />
-              <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
-            </button>
-
-            {/* Office Desk Button (Always accessible) */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('office')}
-              className={`px-3 py-1.5 border rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'office'
-                  ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm'
-                  : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
-              }`}
-              title="এডমিন ইনপুট ও অফিস ডেস্ক (ডিফল্ট পিন: ১২৩৪)"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
-              <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office'}</span>
-            </button>
-
-            {/* AI Scanner & Bulk Import Button (Always accessible) */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('ai')}
-              className={`px-3 py-1.5 border rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'ai'
-                  ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border-amber-300 font-extrabold shadow-sm'
-                  : 'bg-[#072545] hover:bg-[#103763] border-amber-400/40 text-amber-300 hover:text-white'
-              }`}
-              title="এআই ব্যাংক স্টেটমেন্ট ও শিক্ষার্থী তালিকা স্ক্যানার (বাল্ক ডেটা)"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-              <span>{language === 'bn' ? 'AI স্ক্যানার' : 'AI Scanner'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (activeTab === 'students') {
-                  setShowGlobalRegisterPrint(true);
-                } else {
-                  window.print();
-                }
-              }}
-              className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 text-slate-200 hover:text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-              title={activeTab === 'students' ? 'শিক্ষার্থী রেজিস্টার শিট প্রিন্ট করুন' : 'প্রিন্ট করুন'}
-            >
-              <Printer className="w-3.5 h-3.5 text-amber-300" />
-              <span>{language === 'bn' ? 'প্রিন্ট' : 'Print'}</span>
-            </button>
           </div>
         </div>
 
@@ -1558,48 +1559,66 @@ export default function App() {
               {showAllMenuDropdown && (
                 <>
                   <div
-                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-2xs"
+                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-2xs"
                     onClick={() => setShowAllMenuDropdown(false)}
                   />
-                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[80vh] overflow-y-auto bg-[#07213d] border-2 border-amber-400 rounded-2xl shadow-2xl z-50 p-3 sm:p-4 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#144275]">
+                  <div className="absolute right-0 top-full mt-2 w-[340px] sm:w-[500px] max-h-[82vh] overflow-y-auto bg-[#07213d] border-2 border-amber-400 rounded-2xl shadow-2xl z-50 p-3 sm:p-4 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#144275]">
                       <div className="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wide">
-                        <LayoutGrid className="w-4 h-4" />
-                        <span>{language === 'bn' ? 'সম্পূর্ণ মেনু তালিকা (১৯টি বিভাগ)' : 'Complete Navigation Menu'}</span>
+                        <LayoutGrid className="w-4 h-4 text-amber-400" />
+                        <span>{language === 'bn' ? 'সকল ২১টি মেনুর ধারাবাহিক তালিকা' : 'Complete Menu (1 to 21)'}</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowAllMenuDropdown(false)}
-                        className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#144275]"
+                        className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#144275] cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {navTabsList.map(tab => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                          <button
-                            key={tab.id}
-                            type="button"
-                            onClick={() => {
-                              setActiveTab(tab.id as NavTab);
-                              setShowAllMenuDropdown(false);
-                            }}
-                            className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold text-left transition-all ${
-                              isActive
-                                ? 'bg-[#d9482b] text-white shadow-xs font-bold'
-                                : 'bg-[#0c3664] hover:bg-[#144275] text-slate-200 hover:text-white'
-                            }`}
-                          >
-                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
-                            <span className="truncate">{tab.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* Department Section Blocks with strict serial order */}
+                    {['মূল প্রতিষ্ঠান ও পরিচিতি', 'শিক্ষার্থী ও একাডেমিক', 'শিক্ষক ও কর্মচারী ফোরাম', 'প্রাত্যহিক কার্যক্রম ও প্রশাসন', 'অন্যান্য সেবা ও সুবিধা', 'এডমিন ও ডাটা এন্ট্রি'].map((catName) => {
+                      const itemsInCat = navTabsList.filter(t => t.category === catName);
+                      if (itemsInCat.length === 0) return null;
+                      return (
+                        <div key={catName} className="space-y-1.5">
+                          <div className="text-[11px] font-bold text-amber-300/90 bg-[#092b52] px-2.5 py-1 rounded-lg border-l-3 border-amber-400 flex items-center justify-between">
+                            <span>{catName}</span>
+                            <span className="text-[10px] text-amber-200/70 font-mono font-semibold">
+                              ক্রমিক {itemsInCat[0].serial} - {itemsInCat[itemsInCat.length - 1].serial}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            {itemsInCat.map((tab) => {
+                              const Icon = tab.icon;
+                              const isActive = activeTab === tab.id;
+                              return (
+                                <button
+                                  key={tab.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveTab(tab.id as NavTab);
+                                    setShowAllMenuDropdown(false);
+                                  }}
+                                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer ${
+                                    isActive
+                                      ? 'bg-[#d9482b] text-white shadow-xs font-bold ring-1 ring-amber-300'
+                                      : 'bg-[#0c3664] hover:bg-[#144275] text-slate-200 hover:text-white'
+                                  }`}
+                                >
+                                  <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md bg-[#051c36] text-amber-300 border border-amber-400/30 shrink-0">
+                                    {tab.serial}
+                                  </span>
+                                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
+                                  <span className="truncate">{tab.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </>
               )}
