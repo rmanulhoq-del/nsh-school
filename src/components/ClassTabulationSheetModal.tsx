@@ -199,18 +199,24 @@ export default function ClassTabulationSheetModal({
             {/* Section Selector */}
             <div className="flex items-center gap-1 bg-[#061d36] p-1 rounded-xl border border-white/15">
               <span className="text-[10px] text-slate-400 px-2">শাখা:</span>
-              {['all', 'A', 'B', 'C', 'D'].map(sec => (
+              {[
+                { id: 'all', label: 'সকল শাখা' },
+                { id: 'A', label: "শাখা 'ক' (A)" },
+                { id: 'B', label: "শাখা 'খ' (B)" },
+                { id: 'C', label: "শাখা 'গ' (C)" },
+                { id: 'D', label: "শাখা 'ঘ' (D)" }
+              ].map(sec => (
                 <button
-                  key={sec}
+                  key={sec.id}
                   type="button"
-                  onClick={() => setSelectedSection(sec)}
+                  onClick={() => setSelectedSection(sec.id)}
                   className={`px-2 py-1 rounded-lg font-medium transition-all ${
-                    selectedSection === sec
+                    selectedSection === sec.id
                       ? 'bg-[#144275] text-white font-bold'
                       : 'text-slate-300 hover:text-white'
                   }`}
                 >
-                  {sec === 'all' ? 'সকল' : sec}
+                  {sec.label}
                 </button>
               ))}
             </div>

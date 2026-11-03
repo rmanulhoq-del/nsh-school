@@ -43,10 +43,13 @@ export default function ExamMarksEntryModal({
 }: ExamMarksEntryModalProps) {
   const [selectedClass, setSelectedClass] = useState<'6' | '7' | '8' | '9' | '10'>('6');
   const [selectedSection, setSelectedSection] = useState<'A' | 'B' | 'C' | 'D'>('A');
+  const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedExam, setSelectedExam] = useState<ExamType>('১ম সাময়িক');
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [entryMode, setEntryMode] = useState<'individual' | 'bulk_subject'>('individual');
   const [selectedSubjectKey, setSelectedSubjectKey] = useState<string>('bangla_1st');
+
+  const isNineOrTen = selectedClass === '9' || selectedClass === '10';
 
   // Input states for individual student mode
   const [currentMarksInput, setCurrentMarksInput] = useState<Record<string, MarkInput>>({});
@@ -55,12 +58,17 @@ export default function ExamMarksEntryModal({
   // Input states for bulk subject mode (studentId -> MarkInput)
   const [bulkMarksMap, setBulkMarksMap] = useState<Record<string, MarkInput>>({});
 
-  // Filter students in current class & section
+  // Filter students in current class & section & group
   const classStudents = useMemo(() => {
     return students
-      .filter(s => !s.tcIssued && s.className === selectedClass && s.section === selectedSection)
+      .filter(s => {
+        if (s.tcIssued) return false;
+        if (s.className !== selectedClass || s.section !== selectedSection) return false;
+        if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
+        return true;
+      })
       .sort((a, b) => a.roll - b.roll);
-  }, [students, selectedClass, selectedSection]);
+  }, [students, selectedClass, selectedSection, selectedGroup, isNineOrTen]);
 
   // Handle pre-selected student or default to first student in class
   useEffect(() => {
@@ -356,16 +364,49 @@ export default function ExamMarksEntryModal({
                       setSelectedSection(sec);
                       setSaveSuccessMsg(null);
                     }}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                    className={`px-2 py-1 rounded-lg font-bold transition-all ${
                       selectedSection === sec
                         ? 'bg-[#0c3664] text-white shadow-xs'
                         : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
-                    শাখা {sec}
+                    {sec === 'A' ? "শাখা 'ক' (A)" : sec === 'B' ? "শাখা 'খ' (B)" : sec === 'C' ? "শাখা 'গ' (C)" : "শাখা 'ঘ' (D)"}
                   </button>
                 ))}
               </div>
+
+              {isNineOrTen && (
+                <>
+                  <span className="font-bold text-slate-700 ml-2 flex items-center gap-1">
+                    <span>বিভাগ:</span>
+                    <span className="text-[10px] bg-amber-100 text-amber-800 px-1 rounded font-bold">সক্রিয়</span>
+                  </span>
+                  <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-amber-300">
+                    {[
+                      { id: 'all', label: 'সকল' },
+                      { id: 'science', label: 'বিজ্ঞান' },
+                      { id: 'business', label: 'বাণিজ্য' },
+                      { id: 'humanities', label: 'মানবিক' }
+                    ].map(grp => (
+                      <button
+                        key={grp.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedGroup(grp.id);
+                          setSaveSuccessMsg(null);
+                        }}
+                        className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                          selectedGroup === grp.id
+                            ? 'bg-amber-400 text-slate-950 shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {grp.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Exam Selector */}

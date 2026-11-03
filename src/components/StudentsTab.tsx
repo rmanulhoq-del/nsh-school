@@ -22,7 +22,11 @@ import {
   Award,
   Filter,
   Lock,
-  Layers
+  Layers,
+  UserCheck,
+  Landmark,
+  CreditCard,
+  Check
 } from 'lucide-react';
 import {
   Student,
@@ -48,6 +52,9 @@ interface StudentsTabProps {
   onOpenDispatch: (student: StudentDataForDispatch) => void;
   onOpenSlip: (student: StudentDataForDispatch) => void;
   onPrint: () => void;
+  onNavigateToAttendance?: () => void;
+  onNavigateToExams?: () => void;
+  onNavigateToFees?: () => void;
 }
 
 export default function StudentsTab({
@@ -56,7 +63,10 @@ export default function StudentsTab({
   isAdmin,
   onOpenDispatch,
   onOpenSlip,
-  onPrint
+  onPrint,
+  onNavigateToAttendance,
+  onNavigateToExams,
+  onNavigateToFees
 }: StudentsTabProps) {
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
@@ -526,6 +536,32 @@ export default function StudentsTab({
               </div>
             )}
 
+            {/* Quick Navigation: Daily Attendance Hub */}
+            {onNavigateToAttendance && (
+              <button
+                type="button"
+                onClick={onNavigateToAttendance}
+                className="px-3.5 py-2 bg-[#0c3664] hover:bg-[#092b50] text-amber-300 hover:text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors border border-amber-400/40"
+                title="দৈনিক বায়োমেট্রিক ও শিক্ষার্থী হাজিরা পোর্টালে যান"
+              >
+                <UserCheck className="w-4 h-4 text-emerald-400" />
+                <span>📋 দৈনিক হাজিরা</span>
+              </button>
+            )}
+
+            {/* Quick Navigation: 12-Month Fees & Bank Accounts */}
+            {onNavigateToFees && (
+              <button
+                type="button"
+                onClick={onNavigateToFees}
+                className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+                title="শিক্ষার্থীদের ১২ মাসের ফি ও ব্যাংক হিসাব দেখুন"
+              >
+                <Landmark className="w-4 h-4 text-amber-300" />
+                <span>💳 ১২ মাসের ফি ও হিসাব</span>
+              </button>
+            )}
+
             {/* Exam Marks Entry Button (ADMIN ONLY) */}
             {isAdmin && (
               <button
@@ -971,153 +1007,145 @@ export default function StudentsTab({
                       {student.guardianPhone}
                     </a>
                   </div>
-                  {isAdmin && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">নির্ধারিত ফি:</span>
-                      <span className="font-mono font-bold text-slate-900">৳{student.monthlyFee + student.examFee}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-slate-500">মাসিক বেতন:</span>
+                    <span className="font-mono font-bold text-slate-900">৳{student.monthlyFee} / মাস</span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-slate-500">পরীক্ষার ফি:</span>
+                    <span className="font-mono font-bold text-slate-900">৳{student.examFee} ({student.examType || '১ম সাময়িক'})</span>
+                  </div>
                 </div>
 
-                {/* Payment Status or TC Info - Only for Admin */}
-                {isAdmin ? (
-                  student.tcIssued ? (
-                    <div className="bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-xs text-rose-900 space-y-1">
-                      <div className="font-bold flex items-center justify-between">
-                        <span>টিসি ইস্যুর তারিখ: {student.tcDate}</span>
-                      </div>
-                      <div className="text-[11px] text-rose-800">
-                        কারণ: {student.tcReason || 'অন্য বিদ্যালয়ে স্থানান্তর'}
-                      </div>
+                {/* 12-Month Fee Calendar Status Progress */}
+                {student.tcIssued ? (
+                  <div className="bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-xs text-rose-900 space-y-1">
+                    <div className="font-bold flex items-center justify-between">
+                      <span>টিসি ইস্যুর তারিখ: {student.tcDate}</span>
                     </div>
-                  ) : student.status === 'paid' ? (
-                    <div className="bg-[#f0f6f6] p-2.5 rounded-xl border border-[#d2e5e7] text-[11px] text-slate-600 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0c3664]">{student.paidBank}</span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">
-                          {student.paidMonth || 'অক্টোবর ২০২৬'} (পরিশোধিত)
-                        </span>
-                      </div>
-                      <div className="font-mono text-[10px] text-slate-400">Txn: {student.txnId} · {student.paymentDate}</div>
+                    <div className="text-[11px] text-rose-800">
+                      কারণ: {student.tcReason || 'অন্য বিদ্যালয়ে স্থানান্তর'}
                     </div>
-                  ) : (
-                    <div className="bg-rose-50/70 p-2.5 rounded-xl border border-rose-200 text-[11px] text-rose-800 flex items-center justify-between">
-                      <span className="font-medium">বকেয়া বেতনের মাস:</span>
-                      <span className="text-[10px] bg-rose-100 text-rose-900 font-extrabold px-2 py-0.5 rounded-full border border-rose-300">
-                        {student.dueMonth || 'অক্টোবর ২০২৬'}
+                  </div>
+                ) : (
+                  <div className="bg-[#f0f6f6] p-2.5 rounded-xl border border-[#d2e5e7] text-[11px] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0c3664] flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-[#0c3664]" />
+                        <span>১২ মাসের ফি ক্যালেন্ডার:</span>
+                      </span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                        student.status === 'paid'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          : 'bg-amber-100 text-amber-900 border-amber-300'
+                      }`}>
+                        {student.feeMonths ? `${student.feeMonths.length}/১২ মাস পরিশোধিত` : (student.status === 'paid' ? '১০/১২ মাস পরিশোধিত' : '৩/১২ মাস পরিশোধিত')}
                       </span>
                     </div>
-                  )
-                ) : (
-                  <div className="bg-slate-50/80 p-2 rounded-xl border border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                      <Lock className="w-3.5 h-3.5 text-amber-500" />
-                      <span>ফি ও পরীক্ষার বিবরণী</span>
-                    </span>
-                    <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded border border-amber-300">
-                      এডমিন সংরক্ষিত
-                    </span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <span className="truncate max-w-[190px]">ব্যাংক: {student.paidBank || 'বাংলাদেশ কৃষি ব্যাংক (নাপোড়া শাখা)'}</span>
+                      <span className={`font-bold ${student.status === 'paid' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                        {student.status === 'paid' ? '✓ হালনাগাদ' : 'বকেয়া রয়েছে'}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons: Message / Slip / Marks / Marksheet - ONLY FOR ADMIN */}
-              {isAdmin ? (
-                <div className="pt-2.5 border-t border-slate-100 space-y-2">
+              {/* Action Buttons: Available to ALL users (12-Month Slip & Marksheet) + Admin Features */}
+              <div className="pt-2.5 border-t border-slate-100 space-y-2">
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => onOpenDispatch(student)}
-                    className="py-2 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-                    title="অভিভাবকের মোবাইলে WhatsApp বা SMS বার্তা পাঠান"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>মেসেজ পাঠান</span>
-                  </button>
-
+                  {/* 12-Month Fee Slip Button - Always accessible! */}
                   <button
                     type="button"
                     onClick={() => onOpenSlip(student)}
-                    className="py-2 px-2.5 bg-[#0c3664] hover:bg-[#092b50] text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-                    title="অফিসিয়াল ফি রসিদ ও স্লিপ প্রিন্ট করুন"
+                    className="py-2 px-2.5 bg-[#0c3664] hover:bg-[#092b50] text-amber-300 hover:text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs border border-amber-400/30"
+                    title="এই শিক্ষার্থীর ১২ মাসের ফি বিবরণী ও ব্যাংক রসিদ স্লিপ দেখুন ও প্রিন্ট করুন"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-300" />
-                    <span>রসিদ স্লিপ</span>
-                  </button>
-                </div>
-
-                {/* Exam Marks Entry & A4 Marksheet Buttons */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMarksEntryStudentId(student.id);
-                      setShowMarksEntryModal(true);
-                    }}
-                    className="py-2 px-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-                    title="এই শিক্ষার্থীর পরীক্ষার নম্বর ইনপুট ও এডিট করুন"
-                  >
-                    <Pencil className="w-3.5 h-3.5 text-amber-300" />
-                    <span>📝 নম্বর এন্ট্রি</span>
+                    <span>১২ মাসের ফি স্লিপ</span>
                   </button>
 
+                  {/* A4 Marksheet Button - Always accessible! */}
                   <button
                     type="button"
                     onClick={() => {
                       setSelectedStudentForMarksheet(student);
                       setShowMarksheetModal(true);
                     }}
-                    className="py-2 px-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
-                    title="এই শিক্ষার্থীর অফিশিয়াল A4 নম্বর ফর্দ ও মার্কশিট প্রিন্ট করুন"
+                    className="py-2 px-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-extrabold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                    title="এই শিক্ষার্থীর অফিশিয়াল A4 নম্বর ফর্দ ও পরীক্ষার মার্কশিট প্রিন্ট করুন"
                   >
                     <Award className="w-3.5 h-3.5 text-slate-950" />
                     <span>📄 A4 মার্কশিট</span>
                   </button>
                 </div>
 
-                {/* Direct Edit & TC Buttons on Card Bottom */}
-                <div className="flex items-center justify-between gap-2 text-xs pt-1">
-                  {!student.tcIssued ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(student)}
-                        className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#0c3664] font-semibold rounded-lg flex items-center justify-center gap-1 border border-slate-200 transition-colors"
-                      >
-                        <Pencil className="w-3 h-3 text-[#0c3664]" />
-                        <span>তথ্য এডিট</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleOpenTc(student)}
-                        className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 font-semibold rounded-lg flex items-center justify-center gap-1 border border-slate-200 transition-colors"
-                      >
-                        <UserMinus className="w-3 h-3 text-rose-600" />
-                        <span>টিসি / ডিলেট</span>
-                      </button>
-                    </>
-                  ) : (
+                {/* Additional Admin Buttons */}
+                {isAdmin && (
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-0.5">
                     <button
                       type="button"
-                      onClick={() => handleRestoreFromTc(student)}
-                      className="w-full py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-lg flex items-center justify-center gap-1 border border-emerald-300 transition-colors"
+                      onClick={() => onOpenDispatch(student)}
+                      className="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs text-[11px]"
+                      title="অভিভাবকের মোবাইলে WhatsApp বা SMS বার্তা পাঠান"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>পুনরায় সক্রিয় তালিকায় আনুন</span>
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>মেসেজ পাঠান</span>
                     </button>
-                  )}
-                </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMarksEntryStudentId(student.id);
+                        setShowMarksEntryModal(true);
+                      }}
+                      className="py-1.5 px-2 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs text-[11px]"
+                      title="এই শিক্ষার্থীর পরীক্ষার নম্বর ইনপুট ও এডিট করুন"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-amber-300" />
+                      <span>📝 নম্বর এন্ট্রি</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Direct Edit & TC Buttons on Card Bottom (Admin Only) */}
+                {isAdmin && (
+                  <div className="flex items-center justify-between gap-2 text-xs pt-1">
+                    {!student.tcIssued ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(student)}
+                          className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#0c3664] font-semibold rounded-lg flex items-center justify-center gap-1 border border-slate-200 transition-colors"
+                        >
+                          <Pencil className="w-3 h-3 text-[#0c3664]" />
+                          <span>তথ্য এডিট</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenTc(student)}
+                          className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 font-semibold rounded-lg flex items-center justify-center gap-1 border border-slate-200 transition-colors"
+                        >
+                          <UserMinus className="w-3 h-3 text-rose-600" />
+                          <span>টিসি / ডিলেট</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleRestoreFromTc(student)}
+                        className="w-full py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-lg flex items-center justify-center gap-1 border border-emerald-300 transition-colors"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>পুনরায় সক্রিয় তালিকায় আনুন</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span>শিক্ষার্থী পরিচিতি ডিরেক্টরি</span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                  নিয়মিত শিক্ষার্থী
-                </span>
-              </div>
-            )}
-          </div>
+            </div>
           ))}
         </div>
       ) : (

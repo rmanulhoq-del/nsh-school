@@ -170,9 +170,11 @@ export default function HomeTab({
           <div className="lg:col-span-4 bg-[#082545] border-2 border-amber-400/60 p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-400/5 to-transparent pointer-events-none" />
             
-            {/* Motto / Slogan above the logo in prominent, large font as requested */}
-            <div className="mb-3 text-lg sm:text-xl font-black text-amber-300 italic tracking-wider drop-shadow-md">
-              "পড় স্রষ্টার নামে"
+            {/* Motto / Slogan directly above the logo in prominent, large font as requested */}
+            <div className="mb-3 px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-400/20 via-amber-300/30 to-amber-400/20 border border-amber-400/60 shadow-inner">
+              <span className="text-xl sm:text-2xl font-black text-amber-300 italic tracking-wider drop-shadow-md">
+                "পড় স্রষ্টার নামে"
+              </span>
             </div>
 
             <div className="relative">

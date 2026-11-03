@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin,
   RefreshCw,
@@ -25,6 +25,7 @@ import {
   LogOut,
   X,
   Menu,
+  ChevronLeft,
   ChevronRight,
   UserPlus,
   Pencil,
@@ -268,7 +269,22 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_STAFF;
   });
 
-  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    try {
+      const saved = localStorage.getItem('school_transactions');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_TRANSACTIONS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('school_transactions', JSON.stringify(transactions));
+    } catch {}
+  }, [transactions]);
 
   // Statistics
   const totalStudents = students.length;
@@ -282,6 +298,8 @@ export default function App() {
   const handleResetDemoData = () => {
     setStudents(INITIAL_STUDENTS);
     localStorage.setItem('school_students', JSON.stringify(INITIAL_STUDENTS));
+    setTransactions(INITIAL_TRANSACTIONS);
+    localStorage.setItem('school_transactions', JSON.stringify(INITIAL_TRANSACTIONS));
     const sorted = sortTeachersByHierarchy(INITIAL_TEACHERS);
     setTeachers(sorted);
     localStorage.setItem('school_teachers', JSON.stringify(sorted));
@@ -493,38 +511,60 @@ export default function App() {
     }
   };
 
+  const navScrollRef = useRef<HTMLDivElement>(null);
+
+  const handleNavScroll = (direction: 'left' | 'right') => {
+    if (navScrollRef.current) {
+      navScrollRef.current.scrollBy({
+        left: direction === 'left' ? -260 : 260,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const navTabsList = [
     { id: 'home', label: language === 'bn' ? 'হোম' : 'Home', icon: Home },
     { id: 'about', label: language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us', icon: Info },
-    { id: 'donors', label: language === 'bn' ? 'প্রতিষ্ঠাতা ও দাতা ফোরাম' : 'Founders & Donors', icon: HeartHandshake },
-    { id: 'committee', label: language === 'bn' ? 'পরিচালনা পর্ষদ' : 'Managing Committee', icon: Award },
+    { id: 'notices', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell },
+    { id: 'contact', label: language === 'bn' ? 'যোগাযোগ' : 'Contact', icon: Phone },
+    { id: 'students', label: language === 'bn' ? 'শিক্ষার্থী ও ভর্তি' : 'Students & Admission', icon: GraduationCap },
+    { id: 'attendance', label: language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance', icon: UserCheck },
+    { id: 'exams', label: language === 'bn' ? 'পরীক্ষা ও ফলাফল' : 'Exams & Results', icon: Award },
+    { id: 'banks', label: language === 'bn' ? 'ফি ও আয়-ব্যয় হিসাব' : 'Fees & Accounts', icon: Landmark },
     { id: 'teachers', label: language === 'bn' ? 'শিক্ষক ফোরাম' : "Teachers' Forum", icon: Users },
     { id: 'staff', label: language === 'bn' ? 'কর্মচারী তথ্য' : 'Staff Directory', icon: ShieldCheck },
-    { id: 'students', label: language === 'bn' ? 'শিক্ষার্থী ও ভর্তি' : 'Students & Admission', icon: GraduationCap },
+    { id: 'committee', label: language === 'bn' ? 'পরিচালনা পর্ষদ' : 'Managing Committee', icon: Award },
+    { id: 'donors', label: language === 'bn' ? 'প্রতিষ্ঠাতা ও দাতা ফোরাম' : 'Founders & Donors', icon: HeartHandshake },
+    { id: 'edulinks', label: language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক' : 'Edu Portal Links', icon: Globe },
+    { id: 'gallery', label: language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
     { id: 'assembly', label: language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly', icon: Sun },
-    { id: 'gallery', label: language === 'bn' ? 'ফটো গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
     { id: 'parents', label: language === 'bn' ? 'অভিভাবক কলাম' : 'Parents Column', icon: MessageCircle },
-    { id: 'notices', label: language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Bell },
-    { id: 'attendance', label: language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance', icon: UserCheck },
-    { id: 'exams', label: language === 'bn' ? 'পরীক্ষা ও প্রবেশপত্র' : 'Exams & Admit Card', icon: Award },
-    { id: 'banks', label: language === 'bn' ? 'ফি ও হিসাব' : 'Fees & Accounts', icon: Landmark },
     { id: 'sms', label: language === 'bn' ? 'SMS গেটওয়ে' : 'SMS Gateway', icon: MessageCircle },
     { id: 'reports', label: language === 'bn' ? 'মাসিক ও বাৎসরিক রিপোর্ট' : 'Reports', icon: TrendingUp },
-    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles },
-    { id: 'contact', label: language === 'bn' ? 'যোগাযোগ' : 'Contact', icon: Phone }
+    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles }
   ];
 
   return (
     <div className="min-h-screen bg-[#f0f6f6] text-slate-900 flex flex-col font-sans selection:bg-[#0d3b66] selection:text-white">
-     {/* HEADER */}
+      {/* HEADER */}
       <header className="bg-[#0c3664] text-white border-b-2 border-[#d9482b] sticky top-0 z-40 shadow-md">
         {/* Tier 1: Top Info Bar (Desktop only) */}
         <div className="bg-[#082545] border-b border-[#144275] text-slate-300 text-xs hidden md:block">
-          <div className="max-w-7xl mx-auto px-6 h-9 flex items-center justify-between gap-4">
-           <div className="flex items-center gap-3 shrink-0">
+          <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 shrink-0">
               <span className="text-slate-300 font-medium">
                 {language === 'bn' ? 'ইআইআইএন: ১০৪০৬২' : 'EIIN: 104062'}
               </span>
+              <span aria-hidden="true" className="text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab('edulinks')}
+                className="flex items-center gap-1.5 text-[11px] text-amber-300 hover:text-white transition-colors bg-[#051c36] hover:bg-[#123e6e] px-2.5 py-1 rounded border border-[#1d4c82]"
+                title="শিক্ষা মন্ত্রণালয় ও শিক্ষা বোর্ডের সরকারি ওয়েবসাইট ও পোর্টাল লিংক"
+              >
+                <Globe className="w-3.5 h-3.5 text-amber-300" />
+                <span>{language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড পোর্টাল' : 'Ministry & Board Portal'}</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-3 text-[11px] shrink-0">
@@ -548,6 +588,7 @@ export default function App() {
                   English
                 </button>
               </div>
+
             </div>
           </div>
         </div>
@@ -667,7 +708,7 @@ export default function App() {
         </div>
 
         {/* 2B. Desktop View (>= md / >= 768px): Full Spacious Layout */}
-        <div className="hidden md:flex max-w-7xl mx-auto px-6 min-h-[5.5rem] py-3 items-center justify-between gap-6">
+        <div className="hidden md:flex max-w-7xl mx-auto px-4 min-h-[5.5rem] py-3 items-center justify-between gap-6">
           <div
             onClick={() => setActiveTab('home')}
             className="flex items-center gap-4 cursor-pointer shrink-0 group"
@@ -872,30 +913,55 @@ export default function App() {
         )}
 
         {/* Tier 3: Horizontal Swipeable Nav Strip (Zero-overlap guaranteed) */}
-        <nav className="bg-[#092b50] border-t border-[#134377] w-full">
-          <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 w-full flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x">
-            {navTabsList.map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab.id as NavTab);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none ${
-                    isActive
-                      ? 'bg-[#d9482b] text-white font-bold shadow-xs'
-                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+        <nav className="bg-[#092b50] border-t border-[#134377] w-full relative">
+          <div className="max-w-7xl mx-auto px-1 sm:px-2 py-1.5 w-full flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => handleNavScroll('left')}
+              className="hidden lg:flex shrink-0 p-1 text-slate-300 hover:text-white hover:bg-[#123e6e] rounded-md transition-colors"
+              title="বামে স্ক্রল করুন"
+              aria-label="বামে স্ক্রল করুন"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <div
+              ref={navScrollRef}
+              className="flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x scroll-smooth"
+            >
+              {navTabsList.map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab.id as NavTab);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none ${
+                      isActive
+                        ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                        : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleNavScroll('right')}
+              className="hidden lg:flex shrink-0 p-1 text-slate-300 hover:text-white hover:bg-[#123e6e] rounded-md transition-colors"
+              title="ডানে স্ক্রল করুন"
+              aria-label="ডানে স্ক্রল করুন"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </nav>
 
@@ -916,7 +982,7 @@ export default function App() {
       </header>
 
       {/* MAIN BODY CONTENT */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 w-full max-w-full overflow-hidden space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 flex-1 w-full max-w-full overflow-hidden space-y-6">
         {/* Universal Back / Close Navigation Bar for Inner Pages */}
         {activeTab !== 'home' && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-[#d9e6e7] shadow-xs animate-in fade-in duration-150">
@@ -944,7 +1010,7 @@ export default function App() {
                     activeTab === 'staff' ? 'কর্মচারী তথ্য' :
                     activeTab === 'parents' ? 'অভিভাবক কলাম' :
                     activeTab === 'edulinks' ? 'শিক্ষা লিংক' :
-                    activeTab === 'banks' ? 'ব্যাংক একাউন্ট ড্যাশবোর্ড' :
+                    activeTab === 'banks' ? 'ফি ও আয়-ব্যয় হিসাব (ক্যাশ বুক ও ব্যাংক ড্যাশবোর্ড)' :
                     activeTab === 'office' ? 'এডমিন ইনপুট ও অফিস' :
                     activeTab === 'ai' ? 'এআই ব্যাংক স্টেটমেন্ট স্ক্যানার' :
                     activeTab === 'about' ? 'আমাদের সম্পর্কে' :
@@ -1057,6 +1123,9 @@ export default function App() {
               setShowSlipModal(true);
             }}
             onPrint={() => setShowGlobalRegisterPrint(true)}
+            onNavigateToAttendance={() => setActiveTab('attendance')}
+            onNavigateToExams={() => setActiveTab('exams')}
+            onNavigateToFees={() => setActiveTab('banks')}
           />
         )}
 
@@ -1064,6 +1133,7 @@ export default function App() {
           <DailyAssemblyTab
             language={language}
             isAdmin={!!currentAdmin}
+            currentAdmin={currentAdmin}
             onRequireAdminLogin={() => {
               setLoginPasswordInput('');
               setLoginError('');
@@ -1101,13 +1171,21 @@ export default function App() {
         {activeTab === 'exams' && (
           <ExamsAndAdmitCardTab
             students={students}
+            setStudents={setStudents}
             isAdmin={!!currentAdmin}
+            onRequireAdminLogin={() => {
+              setLoginPasswordInput('');
+              setLoginError('');
+              setShowAdminLoginModal(true);
+            }}
           />
         )}
 
         {activeTab === 'sms' && (
           <SmsGatewayTab
             students={students}
+            teachers={teachers}
+            staffList={staffList}
             isAdmin={!!currentAdmin}
             initialCustomMessage={smsPrefillMessage}
           />
@@ -1142,50 +1220,29 @@ export default function App() {
         )}
 
         {activeTab === 'banks' && (
-          currentAdmin ? (
-            <BankDashboardTab
-              students={students}
-              totalStudents={totalStudents}
-              paidStudents={paidStudents}
-              dueStudents={dueStudents}
-              totalCollected={totalCollected}
-              totalDueAmount={totalDueAmount}
-              krishiCount={krishiCount}
-              ificCount={ificCount}
-              setActiveTab={setActiveTab}
-            />
-          ) : (
-            <div className="bg-white border-2 border-amber-400/80 rounded-3xl p-8 max-w-2xl mx-auto shadow-md text-center space-y-5 animate-in fade-in my-8">
-              <div className="w-16 h-16 bg-amber-100 text-[#0c3664] rounded-2xl flex items-center justify-center mx-auto shadow-xs border border-amber-300">
-                <Lock className="w-8 h-8 text-[#0c3664]" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-extrabold text-[#0c3664]">
-                  বিদ্যালয়ের ব্যাংক হিসাব ও আয়-ব্যয় ড্যাশবোর্ড
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
-                  বিদ্যালয়ের ব্যাংক হিসাব, ফি আদায় ও সামগ্রিক আয়/ব্যয়ের তথ্য সাধারণ দর্শকদের জন্য সম্পূর্ণ গোপন রাখা হয়েছে। শুধুমাত্র অনুমোদিত শিক্ষক ও প্রশাসনিক কর্মকর্তা এডমিন লগইন করে এই তথ্য দেখতে ও পরিচালনা করতে পারবেন।
-                </p>
-              </div>
-              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAdminLoginModal(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold rounded-xl text-xs flex items-center gap-2 shadow-sm transition-all"
-                >
-                  <Lock className="w-4 h-4 text-slate-950" />
-                  <span>এডমিন প্যানেলে লগইন করুন</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('home')}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
-                >
-                  ← মূল পাতায় ফিরে যান
-                </button>
-              </div>
-            </div>
-          )
+          <BankDashboardTab
+            students={students}
+            totalStudents={totalStudents}
+            paidStudents={paidStudents}
+            dueStudents={dueStudents}
+            totalCollected={totalCollected}
+            totalDueAmount={totalDueAmount}
+            krishiCount={krishiCount}
+            ificCount={ificCount}
+            setActiveTab={setActiveTab}
+            isAdmin={!!currentAdmin}
+            transactions={transactions}
+            setTransactions={setTransactions}
+            onOpenSlip={(stu) => {
+              setSelectedStudentForSlip(stu);
+              setShowSlipModal(true);
+            }}
+            onRequireAdminLogin={() => {
+              setLoginPasswordInput('');
+              setLoginError('');
+              setShowAdminLoginModal(true);
+            }}
+          />
         )}
 
         {activeTab === 'office' && (
@@ -1267,13 +1324,16 @@ export default function App() {
                   {language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('gallery')} className="hover:text-amber-300 text-left font-bold text-amber-200">
-                  {language === 'bn' ? 'ফটো গ্যালারি' : 'Gallery'}
+                  {language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Gallery'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('parents')} className="hover:text-white text-left">
                   {language === 'bn' ? 'অভিভাবক কলাম' : 'Parents'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('notices')} className="hover:text-white text-left">
                   {language === 'bn' ? 'নোটিশ বোর্ড' : 'Notices'}
+                </button>
+                <button type="button" onClick={() => setActiveTab('edulinks')} className="hover:text-amber-300 text-left font-bold text-amber-200">
+                  {language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক' : 'Edu Ministry Links'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('contact')} className="hover:text-white text-left">
                   {language === 'bn' ? 'যোগাযোগ' : 'Contact'}
@@ -1944,6 +2004,23 @@ export default function App() {
         <StudentSlipModal
           student={selectedStudentForSlip}
           isOpen={showSlipModal}
+          isAdmin={!!currentAdmin}
+          onUpdateFeeMonths={(studentId, updatedMonths) => {
+            const updated = students.map(s => {
+              if (s.id === studentId) {
+                return {
+                  ...s,
+                  feeMonths: updatedMonths,
+                  status: (updatedMonths.length >= 10 ? 'paid' : 'due') as 'paid' | 'due'
+                };
+              }
+              return s;
+            });
+            setStudents(updated);
+            try {
+              localStorage.setItem('school_students', JSON.stringify(updated));
+            } catch {}
+          }}
           onClose={() => {
             setShowSlipModal(false);
             setSelectedStudentForSlip(null);

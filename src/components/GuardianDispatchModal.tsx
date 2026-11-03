@@ -34,6 +34,10 @@ export interface StudentDataForDispatch {
   paymentDate?: string;
   paidMonth?: string;
   dueMonth?: string;
+  feeMonths?: string[];
+  feeYear?: string;
+  examType?: string;
+  examFeeStatus?: string;
 }
 
 interface GuardianDispatchModalProps {

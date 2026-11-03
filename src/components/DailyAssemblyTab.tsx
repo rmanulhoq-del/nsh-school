@@ -23,13 +23,18 @@ import {
   FileText,
   RotateCcw,
   ShieldCheck,
-  Check
+  Check,
+  Lock,
+  KeyRound,
+  AlertCircle,
+  Shield
 } from 'lucide-react';
-import { Teacher } from '../types';
+import { Teacher, AdminUser } from '../types';
 
 interface DailyAssemblyTabProps {
   language: 'bn' | 'en';
   isAdmin: boolean;
+  currentAdmin?: AdminUser | null;
   onRequireAdminLogin: () => void;
   teachers?: Teacher[];
 }
@@ -215,9 +220,23 @@ const DEFAULT_ASSEMBLY_PHOTOS: AssemblyPhotoItem[] = [
 export default function DailyAssemblyTab({
   language,
   isAdmin,
+  currentAdmin,
   onRequireAdminLogin,
   teachers = []
 }: DailyAssemblyTabProps) {
+  // হেডার এডিট শুধুমাত্র প্রধান এডমিন (Headmaster) এবং ডেভেলপার (IT Admin) এর অধীনে থাকবে
+  const isSuperAdminOrDev = Boolean(
+    currentAdmin && (
+      currentAdmin.role === 'headmaster' ||
+      currentAdmin.role === 'it_admin' ||
+      currentAdmin.id === 'ADM-01' ||
+      currentAdmin.id === 'ADM-05'
+    )
+  );
+
+  const [headerDevPin, setHeaderDevPin] = useState('');
+  const [headerDevPinError, setHeaderDevPinError] = useState('');
+
   // 1. Header Info State
   const [headerInfo, setHeaderInfo] = useState<AssemblyHeaderInfo>(() => {
     try {
@@ -434,9 +453,21 @@ export default function DailyAssemblyTab({
   // Save Handlers
   const handleSaveHeader = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Security check: Must be Super Admin (Headmaster) or Developer (IT Admin) or verified with Master PIN
+    const masterPin = localStorage.getItem('nsh_admin_pin') || '1234';
+    const isAuthorized = isSuperAdminOrDev || (headerDevPin.trim() === masterPin);
+
+    if (!isAuthorized) {
+      setHeaderDevPinError('অননুমোদিত চেষ্টা! সমাবেশ হেডার এডিট শুধুমাত্র প্রধান এডমিন এবং সিস্টেম ডেভেলপারের অধীনে সংরক্ষিত। দয়া করে সঠিক পিন দিন।');
+      return;
+    }
+
     setHeaderInfo(headerForm);
     localStorage.setItem('nsh_assembly_header', JSON.stringify(headerForm));
     setShowHeaderEditModal(false);
+    setHeaderDevPin('');
+    setHeaderDevPinError('');
   };
 
   const handleSaveRoster = (e: React.FormEvent) => {
@@ -602,20 +633,38 @@ export default function DailyAssemblyTab({
                 <span>{headerInfo.subtitle}</span>
               </div>
 
-              {isAdmin && (
+              {/* হেডার এডিট বাটন: শুধুমাত্র এডমিন ও ডেভেলপারের অধীনে থাকবে */}
+              {isSuperAdminOrDev ? (
                 <button
                   type="button"
                   onClick={() => {
                     setHeaderForm(headerInfo);
+                    setHeaderDevPin('');
+                    setHeaderDevPinError('');
                     setShowHeaderEditModal(true);
                   }}
-                  className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-amber-300 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-                  title="হেডার তথ্য ও সময় এডিট করুন"
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-full text-xs font-black transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                  title="হেডার তথ্য ও সময় এডিট করুন (এডমিন ও ডেভেলপার এক্সেস)"
                 >
-                  <Edit3 className="w-3 h-3" />
-                  <span>হেডার এডিট</span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-950" />
+                  <span>হেডার এডিট (এডমিন/ডেভ)</span>
                 </button>
-              )}
+              ) : isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHeaderForm(headerInfo);
+                    setHeaderDevPin('');
+                    setHeaderDevPinError('');
+                    setShowHeaderEditModal(true);
+                  }}
+                  className="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-slate-300 hover:text-amber-300 rounded-full text-[11px] font-medium transition-all flex items-center gap-1 cursor-pointer border border-white/20"
+                  title="হেডার এডিট শুধুমাত্র প্রধান এডমিন এবং সিস্টেম ডেভেলপারের অধীনে সংরক্ষিত"
+                >
+                  <Lock className="w-3 h-3 text-amber-300" />
+                  <span>হেডার এডিট (সুরক্ষিত)</span>
+                </button>
+              ) : null}
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
@@ -1413,17 +1462,65 @@ export default function DailyAssemblyTab({
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <h3 className="font-bold text-base text-slate-900">সমাবেশ হেডার ও পরিচিতি এডিট</h3>
-                <p className="text-xs text-slate-500">শিরোনাম, সময়সূচি ও ভূমিকা সম্পাদন করুন</p>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-600" />
+                  <h3 className="font-bold text-base text-slate-900">সমাবেশ হেডার ও পরিচিতি এডিট</h3>
+                </div>
+                <p className="text-xs text-amber-700 font-medium">
+                  🔒 শুধুমাত্র সম্মানিত প্রধান শিক্ষক (এডমিন) ও আইটি ইনচার্জ (ডেভেলপার)-এর জন্য সংরক্ষিত
+                </p>
               </div>
               <button
                 type="button"
-                onClick={() => setShowHeaderEditModal(false)}
+                onClick={() => {
+                  setShowHeaderEditModal(false);
+                  setHeaderDevPin('');
+                  setHeaderDevPinError('');
+                }}
                 className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Role Verification Banner */}
+            {isSuperAdminOrDev ? (
+              <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>অনুমোদিত কর্মকর্তা: {currentAdmin?.name} ({currentAdmin?.roleName}) · এক্সেস সক্রিয়</span>
+              </div>
+            ) : (
+              <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-2">
+                <div className="flex items-start gap-2 text-xs text-amber-900 font-medium">
+                  <Shield className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div>
+                    <strong>এডমিন ও ডেভেলপার ভেরিফিকেশন:</strong> হেডার পরিবর্তনের ক্ষমতা শুধুমাত্র প্রধান শিক্ষক (এডমিন) এবং সিস্টেম ডেভেলপারের অধীনে। পরিবর্তন সংরক্ষণে মাস্টার পিন প্রদান করুন।
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-rose-600" />
+                    <span>এডমিন বা ডেভেলপার মাস্টার পিন (Security PIN) *:</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={headerDevPin}
+                    onChange={(e) => {
+                      setHeaderDevPin(e.target.value);
+                      setHeaderDevPinError('');
+                    }}
+                    placeholder="মাস্টার পিন দিন (ডিফল্ট: 1234)"
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono"
+                  />
+                  {headerDevPinError && (
+                    <p className="text-[11px] text-red-600 font-bold flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>{headerDevPinError}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSaveHeader} className="space-y-3 text-xs">
               <div className="space-y-1">

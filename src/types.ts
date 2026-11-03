@@ -54,10 +54,10 @@ export const formatGroupBangla = (group?: StudentGroup | string): string => {
 
 export const formatSectionBangla = (sec: string): string => {
   switch (sec) {
-    case 'A': return 'শাখা: এ (ক)';
-    case 'B': return 'শাখা: বি (খ)';
-    case 'C': return 'শাখা: সি (গ)';
-    case 'D': return 'শাখা: ডি (ঘ)';
+    case 'A': return "শাখা: ক (A)";
+    case 'B': return "শাখা: খ (B)";
+    case 'C': return "শাখা: গ (C)";
+    case 'D': return "শাখা: ঘ (D)";
     default: return `শাখা: ${sec}`;
   }
 };
