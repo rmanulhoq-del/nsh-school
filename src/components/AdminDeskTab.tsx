@@ -20,7 +20,8 @@ import {
   X,
   Check,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import { AdminUser, Student, Teacher, StaffMember, Transaction, formatClassOrdinal, formatClassBangla } from '../types';
 import { AUTHORIZED_STAFF } from '../data/initialData';
@@ -44,6 +45,7 @@ interface AdminDeskTabProps {
   onPublishNoticeExternal?: (title: string, content: string, author: string) => void;
   onOpenEditHeadmaster?: () => void;
   onOpenAdminUsersModal?: () => void;
+  onNavigateToAiScanner?: () => void;
 }
 
 export default function AdminDeskTab({
@@ -56,9 +58,10 @@ export default function AdminDeskTab({
   setTransactions,
   onPublishNoticeExternal,
   onOpenEditHeadmaster,
-  onOpenAdminUsersModal
+  onOpenAdminUsersModal,
+  onNavigateToAiScanner
 }: AdminDeskTabProps) {
-  const [adminActiveSubTab, setAdminActiveSubTab] = useState<'student_entry' | 'exam_marks_entry' | 'bank_fee_entry' | 'notice_entry' | 'account_entry' | 'quick_list'>('student_entry');
+  const [adminActiveSubTab, setAdminActiveSubTab] = useState<'student_entry' | 'bulk_import' | 'exam_marks_entry' | 'bank_fee_entry' | 'notice_entry' | 'account_entry' | 'quick_list'>('student_entry');
   const [adminActionMessage, setAdminActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Exam Marks & Tabulation Modal States
@@ -513,6 +516,7 @@ export default function AdminDeskTab({
         <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold scrollbar-none">
           {[
             { id: 'student_entry', label: '📝 নতুন শিক্ষার্থী ভর্তি এন্ট্রি', icon: UserPlus },
+            { id: 'bulk_import', label: '🤖 AI স্ক্যানার ও বাল্ক ডাটা ইম্পোর্ট', icon: Sparkles },
             { id: 'exam_marks_entry', label: '📊 পরীক্ষার নম্বর ও রেজাল্ট এন্ট্রি', icon: Award },
             { id: 'bank_fee_entry', label: '💳 ব্যাংক ডিপোজিট স্লিপ ও ফি এন্ট্রি', icon: Landmark },
             { id: 'notice_entry', label: '📢 নতুন নোটিশ প্রকাশ', icon: BellRing },
@@ -526,7 +530,7 @@ export default function AdminDeskTab({
                 key={subTab.id}
                 type="button"
                 onClick={() => setAdminActiveSubTab(subTab.id as any)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-[#0c3664] text-white shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -540,9 +544,84 @@ export default function AdminDeskTab({
         </div>
       </div>
 
+      {/* Sub-tab: Bulk Import & AI Scanner Hub */}
+      {adminActiveSubTab === 'bulk_import' && (
+        <div className="bg-white border border-[#d9e6e7] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-slate-950 p-6 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-900">
+                <Sparkles className="w-4 h-4 text-slate-950" />
+                <span>AI চালিত বাল্ক শিক্ষার্থী ডাটা ও ব্যাংক স্টেটমেন্ট হাব</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-950 mt-1">
+                এক সাথে শত শত শিক্ষার্থীর তালিকা অটো-এড করুন
+              </h3>
+              <p className="text-xs text-slate-900/90 mt-1 max-w-2xl font-medium">
+                হাতে লেখা বা প্রিন্ট করা শিক্ষার্থীর রেজিস্টার/তালিকার ছবি (JPG/PNG), স্ক্যানড পিডিএফ কপি অথবা এক্সেল/ওয়ার্ডের পুরো টেবিল কপি-পেস্ট করে ১-ক্লিকে ডেটাবেসে অন্তর্ভুক্ত করার স্বয়ংক্রিয় ব্যবস্থা।
+              </p>
+            </div>
+
+            {onNavigateToAiScanner && (
+              <button
+                type="button"
+                onClick={onNavigateToAiScanner}
+                className="px-6 py-3 bg-[#0c3664] hover:bg-[#092b50] text-white font-extrabold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer shrink-0 active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>সরাসরি AI স্ক্যানার ট্যাবে যান →</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>১. ছাত্র / ছাত্রীদের লিস্ট ছবি বা স্ক্যান করে পাঠানোর পদ্ধতি</span>
+              </div>
+              <p className="text-slate-600 leading-relaxed">
+                আপনার কাছে থাকা ক্লাস রেজিস্টার বা ছাত্র-ছাত্রীদের তালিকার পরিষ্কার ছবি (JPG/PNG) বা স্ক্যান কপি <strong>AI স্ক্যানার</strong> ট্যাবে আপলোড করলে এআই স্বয়ংক্রিয়ভাবে শিক্ষার্থীদের নাম, শ্রেণি, শাখা ও রোল শনাক্ত করে টেবিলে সাজিয়ে দেবে।
+              </p>
+              <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-medium">
+                ✓ এছাড়াও ব্যবহারকারী চ্যাটে ছবি বা পিডিএফ পাঠিয়ে দিলে স্বয়ংক্রিয়ভাবে তা সরাসরি মূল ডাটাবেসে সেভ হয়ে যায়।
+              </div>
+            </div>
+
+            <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                <Landmark className="w-4 h-4 text-[#0c3664]" />
+                <span>২. ব্যাংকের দৈনিক জমার স্টেটমেন্ট রিকনসিলিয়েশন</span>
+              </div>
+              <p className="text-slate-600 leading-relaxed">
+                বাংলাদেশ কৃষি ব্যাংক ও আইএফআইসি ব্যাংক নাপোড়া বাজার শাখা থেকে প্রাপ্ত জমার শিট পেস্ট করলেই এআই শিক্ষার্থীদের ফি পরিশোধ ও ভাউচার ট্রানজাকশন ১-ক্লিকে হালনাগাদ করে দেয়।
+              </p>
+              <div className="text-[11px] text-blue-900 bg-blue-50 border border-blue-200 p-2.5 rounded-xl font-medium">
+                ✓ কৃষি ব্যাংক ও আইএফআইসি ব্যাংকের স্যাম্পল শিট দিয়ে তাৎক্ষণিক টেস্ট করার সুবিধাও রয়েছে।
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sub-tab: Student Entry */}
       {adminActiveSubTab === 'student_entry' && (
         <div className="bg-white border border-[#d9e6e7] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          {/* Quick Bulk Import Callout */}
+          <div className="bg-amber-50 border border-amber-300 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-amber-950 font-medium">
+              <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>এক সাথে একাধিক শিক্ষার্থীর তালিকা বা এক্সেল শিট আপলোড করতে চান?</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAdminActiveSubTab('bulk_import')}
+              className="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI স্ক্যানার ও বাল্ক ইম্পোর্ট খুলুন</span>
+            </button>
+          </div>
+
           <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">

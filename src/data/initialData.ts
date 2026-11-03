@@ -1,4 +1,5 @@
 import { AdminUser, Student, Teacher, StaffMember, Transaction } from '../types';
+import { CLASS_10_HUMANITIES_STUDENTS } from './class10HumanitiesStudents';
 
 export const SCHOOL_EIIN = '104062';
 export const SCHOOL_EIIN_BN = '১০৪০৬২';
@@ -402,34 +403,6 @@ export const INITIAL_STUDENTS: Student[] = [
     examFeeStatus: 'due'
   },
   {
-    id: 'STU-10C-003',
-    name: 'তাহসিনা জাহান নিঝুম',
-    className: '10',
-    section: 'C',
-    roll: 3,
-    gender: 'female',
-    group: 'business',
-    fatherName: 'মুহাম্মদ কামাল উদ্দিন',
-    motherName: 'নাজমা বেগম',
-    guardianName: 'মুহাম্মদ কামাল উদ্দিন',
-    guardianPhone: '01822-445566',
-    address: 'গ্রাম: মধ্যম নাপোড়া, বাঁশখালী, চট্টগ্রাম',
-    birthDate: '২০০৯-০৮-১২',
-    birthRegNo: '২০০৯০৪১৫১২৩৪৫৬৭৯৪',
-    admissionDate: '২০২০-০১-১০',
-    monthlyFee: 1000,
-    examFee: 600,
-    status: 'paid',
-    paidBank: 'বাংলাদেশ কৃষি ব্যাংক, নাপোড়া শাখা',
-    txnId: 'BKB-892770',
-    paymentDate: '2026-10-14 10:20 AM',
-    paidMonth: 'অক্টোবর ২০২৬',
-    feeMonths: ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'অক্টোবর'],
-    feeYear: '২০২৬',
-    examType: '১ম সাময়িক',
-    examFeeStatus: 'paid'
-  },
-  {
     id: 'STU-10D-005',
     name: 'কামরুল হাসান রিফাত',
     className: '10',
@@ -566,7 +539,8 @@ export const INITIAL_STUDENTS: Student[] = [
     feeYear: '২০২৬',
     examType: '১ম সাময়িক',
     examFeeStatus: 'paid'
-  }
+  },
+  ...CLASS_10_HUMANITIES_STUDENTS
 ];
 
 export const getTeacherHierarchyRank = (t: Teacher): number => {

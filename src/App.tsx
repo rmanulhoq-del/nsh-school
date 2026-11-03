@@ -40,7 +40,11 @@ import {
   Check,
   TrendingUp,
   Image as ImageIcon,
-  Sun
+  Sun,
+  LayoutGrid,
+  History,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 
 import SchoolLogo from './components/SchoolLogo';
@@ -94,11 +98,45 @@ import {
   INITIAL_TRANSACTIONS,
   sortTeachersByHierarchy
 } from './data/initialData';
+import { CLASS_10_HUMANITIES_STUDENTS } from './data/class10HumanitiesStudents';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [language, setLanguage] = useState<'bn' | 'en'>('bn');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [aboutInitialSection, setAboutInitialSection] = useState<'all' | 'overview' | 'headmasters'>('overview');
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [dropdownCoords, setDropdownCoords] = useState<{ left: number; top: number }>({ left: 100, top: 120 });
+  const navContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = (menuName: string, event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (activeDropdown === menuName) {
+      setActiveDropdown(null);
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const menuWidth = 320;
+      let targetLeft = rect.left;
+      if (targetLeft + menuWidth > window.innerWidth - 12) {
+        targetLeft = Math.max(12, window.innerWidth - menuWidth - 12);
+      }
+      setDropdownCoords({
+        left: targetLeft,
+        top: rect.bottom + 6
+      });
+      setActiveDropdown(menuName);
+      setShowAllMenuDropdown(false);
+    }
+  };
+
+  // Close dropdown on window resize or scroll
+  useEffect(() => {
+    const handleClose = () => {
+      if (activeDropdown) setActiveDropdown(null);
+    };
+    window.addEventListener('resize', handleClose);
+    return () => window.removeEventListener('resize', handleClose);
+  }, [activeDropdown]);
 
   // Guardian Dispatch & Slip State
   const [selectedStudentForDispatch, setSelectedStudentForDispatch] = useState<StudentDataForDispatch | null>(null);
@@ -248,7 +286,17 @@ export default function App() {
   // Data State
   const [students, setStudents] = useState<Student[]>(() => {
     const saved = localStorage.getItem('school_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
+    if (!saved) return INITIAL_STUDENTS;
+    try {
+      const parsed: Student[] = JSON.parse(saved);
+      // Ensure all 126 students from the register (Class 10 Section C Humanities) are present
+      const non10C = parsed.filter(s => !(s.className === '10' && s.section === 'C'));
+      const merged = [...non10C, ...CLASS_10_HUMANITIES_STUDENTS];
+      localStorage.setItem('school_students', JSON.stringify(merged));
+      return merged;
+    } catch {
+      return INITIAL_STUDENTS;
+    }
   });
 
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
@@ -512,13 +560,55 @@ export default function App() {
   };
 
   const navScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [showAllMenuDropdown, setShowAllMenuDropdown] = useState(false);
+
+  const checkNavScroll = () => {
+    if (navScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = navScrollRef.current;
+      setCanScrollLeft(scrollLeft > 6);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 6);
+    }
+  };
+
+  useEffect(() => {
+    const el = navScrollRef.current;
+    if (el) {
+      checkNavScroll();
+      el.addEventListener('scroll', checkNavScroll, { passive: true });
+      window.addEventListener('resize', checkNavScroll);
+      return () => {
+        el.removeEventListener('scroll', checkNavScroll);
+        window.removeEventListener('resize', checkNavScroll);
+      };
+    }
+  }, []);
+
+  // Smooth scroll active tab into view whenever activeTab changes
+  useEffect(() => {
+    if (navScrollRef.current) {
+      const activeEl = navScrollRef.current.querySelector('[data-active="true"]') as HTMLElement;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+      }
+      setTimeout(checkNavScroll, 300);
+    }
+  }, [activeTab]);
 
   const handleNavScroll = (direction: 'left' | 'right') => {
     if (navScrollRef.current) {
       navScrollRef.current.scrollBy({
-        left: direction === 'left' ? -260 : 260,
+        left: direction === 'left' ? -280 : 280,
         behavior: 'smooth'
       });
+      setTimeout(checkNavScroll, 320);
+    }
+  };
+
+  const handleNavWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (navScrollRef.current && Math.abs(e.deltaY) > 0) {
+      navScrollRef.current.scrollLeft += e.deltaY;
     }
   };
 
@@ -538,10 +628,12 @@ export default function App() {
     { id: 'edulinks', label: language === 'bn' ? 'শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক' : 'Edu Portal Links', icon: Globe },
     { id: 'gallery', label: language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Photo & Video Gallery', icon: ImageIcon },
     { id: 'assembly', label: language === 'bn' ? 'প্রাত্যহিক সমাবেশ' : 'Daily Assembly', icon: Sun },
-    { id: 'parents', label: language === 'bn' ? 'অভিভাবক কলাম' : 'Parents Column', icon: MessageCircle },
+    { id: 'parents', label: language === 'bn' ? 'অভিভাবকের কলাম' : "Parents' Column", icon: MessageCircle },
     { id: 'sms', label: language === 'bn' ? 'SMS গেটওয়ে' : 'SMS Gateway', icon: MessageCircle },
     { id: 'reports', label: language === 'bn' ? 'মাসিক ও বাৎসরিক রিপোর্ট' : 'Reports', icon: TrendingUp },
-    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles }
+    { id: 'excellence', label: language === 'bn' ? 'প্রশিক্ষণ ও মেধা বিকাশ' : 'Excellence Hub', icon: Sparkles },
+    { id: 'office', label: language === 'bn' ? 'অফিস ডেস্ক ও ইনপুট' : 'Office Desk', icon: ShieldCheck },
+    { id: 'ai', label: language === 'bn' ? 'AI স্ক্যানার ও বাল্ক ইম্পোর্ট' : 'AI Scanner & Bulk Import', icon: Sparkles }
   ];
 
   return (
@@ -809,17 +901,35 @@ export default function App() {
               <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
             </button>
 
-            {currentAdmin && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('office')}
-                className="px-3 py-1.5 bg-[#144275] hover:bg-[#1d5796] border border-blue-400/40 text-amber-200 hover:text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-                title="এডমিন ইনপুট ও অফিস ডেস্ক"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
-                <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office'}</span>
-              </button>
-            )}
+            {/* Office Desk Button (Always accessible) */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('office')}
+              className={`px-3 py-1.5 border rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'office'
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm'
+                  : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
+              }`}
+              title="এডমিন ইনপুট ও অফিস ডেস্ক (ডিফল্ট পিন: ১২৩৪)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+              <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office'}</span>
+            </button>
+
+            {/* AI Scanner & Bulk Import Button (Always accessible) */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('ai')}
+              className={`px-3 py-1.5 border rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'ai'
+                  ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border-amber-300 font-extrabold shadow-sm'
+                  : 'bg-[#072545] hover:bg-[#103763] border-amber-400/40 text-amber-300 hover:text-white'
+              }`}
+              title="এআই ব্যাংক স্টেটমেন্ট ও শিক্ষার্থী তালিকা স্ক্যানার (বাল্ক ডেটা)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+              <span>{language === 'bn' ? 'AI স্ক্যানার' : 'AI Scanner'}</span>
+            </button>
 
             <button
               type="button"
@@ -841,35 +951,310 @@ export default function App() {
 
         {/* Mobile Dropdown Menu Drawer (Visible when isMobileMenuOpen is true) */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-[#07213d] border-b-2 border-amber-400 p-3 sm:p-4 space-y-3 animate-in slide-in-from-top duration-150 shadow-xl">
+          <div className="md:hidden bg-[#07213d] border-b-2 border-amber-400 p-3 sm:p-4 space-y-4 animate-in slide-in-from-top duration-150 shadow-xl max-h-[85vh] overflow-y-auto">
             <div className="text-xs font-bold text-amber-300 uppercase tracking-wider pb-1.5 border-b border-[#144275] flex items-center justify-between">
-              <span>মেনু তালিকা (Navigation Menu)</span>
-              <span className="text-[10px] text-slate-300">{navTabsList.length} টি বিভাগ</span>
+              <span>মেনু ও প্রধান বিভাগসমূহ</span>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5">
-              {navTabsList.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveTab(tab.id as NavTab);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left ${
-                      isActive
-                        ? 'bg-[#d9482b] text-white shadow-xs'
-                        : 'bg-[#0c3664] text-slate-200 hover:text-white hover:bg-[#144275]'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
-                    <span className="truncate">{tab.label}</span>
-                  </button>
-                );
-              })}
+            {/* Group 1: প্রধান লিংকসমূহ */}
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-bold text-amber-400/90 flex items-center gap-1.5 px-1">
+                <Home className="w-3.5 h-3.5" />
+                <span>প্রধান সেবা ও হোম</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left ${
+                    activeTab === 'home' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Home className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="truncate">হোম</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('attendance'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left ${
+                    activeTab === 'attendance' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="truncate">দৈনিক হাজিরা</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('banks'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left ${
+                    activeTab === 'banks' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Landmark className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="truncate">আয়-ব্যয় হিসাব</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('notices'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left ${
+                    activeTab === 'notices' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Bell className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="truncate">নোটিশ বোর্ড</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('contact'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-all text-left col-span-2 ${
+                    activeTab === 'contact' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Phone className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="truncate">যোগাযোগ ও লোকেশন</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Group 2: আমাদের সম্পর্কে (ড্রপডাউন সাব-আইটেমস) */}
+            <div className="space-y-1.5 pt-2 border-t border-[#144275]/60">
+              <div className="text-[11px] font-bold text-amber-400/90 flex items-center gap-1.5 px-1">
+                <Info className="w-3.5 h-3.5" />
+                <span>আমাদের সম্পর্কে (About Us)</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('about');
+                    setAboutInitialSection('overview');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'about' && aboutInitialSection === 'overview'
+                      ? 'bg-[#d9482b] text-white shadow-xs'
+                      : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>বিস্তারিত বিবরণ ও ইতিহাস</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('about');
+                    setAboutInitialSection('headmasters');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'about' && aboutInitialSection === 'headmasters'
+                      ? 'bg-[#d9482b] text-white shadow-xs ring-1 ring-amber-300'
+                      : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <History className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>১ম থেকে বর্তমান প্রধান শিক্ষকের তথ্যাবলী (সময়কাল)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('committee');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'committee' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>বর্তমান বিদ্যালয় পরিচালনা কমিটি</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('donors');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'donors' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <HeartHandshake className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>বিদ্যালয়ের প্রতিষ্ঠাতা ও দাতা তথ্য</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Group 3: শিক্ষার্থী তথ্য */}
+            <div className="space-y-1.5 pt-2 border-t border-[#144275]/60">
+              <div className="text-[11px] font-bold text-amber-400/90 flex items-center gap-1.5 px-1">
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>শিক্ষার্থী তথ্য ও কার্যক্রম</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAdmissionModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left bg-gradient-to-r from-emerald-700 to-teal-700 text-white shadow-xs"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-white shrink-0" />
+                  <span>ভর্তির আবেদন</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('students');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'students' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>শিক্ষার্থী তালিকা</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('exams');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'exams' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>পরীক্ষা ও ফলাফল</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('assembly');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'assembly' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Sun className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>প্রাত্যহিক সমাবেশ</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Group 4: শিক্ষক ফোরাম ও কর্মী */}
+            <div className="space-y-1.5 pt-2 border-t border-[#144275]/60">
+              <div className="text-[11px] font-bold text-amber-400/90 flex items-center gap-1.5 px-1">
+                <Users className="w-3.5 h-3.5" />
+                <span>শিক্ষক ফোরাম ও কর্মচারী</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('teachers');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'teachers' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>শিক্ষক ফোরাম</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('staff');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'staff' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>কর্মচারী তথ্য</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Group 5: সহশিক্ষা ও অন্যান্য সেবা */}
+            <div className="space-y-1.5 pt-2 border-t border-[#144275]/60">
+              <div className="text-[11px] font-bold text-amber-400/90 flex items-center gap-1.5 px-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>অন্যান্য সেবা ও সহশিক্ষা</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('parents'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'parents' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>অভিভাবকের কলাম</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('gallery'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'gallery' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>ফটো ও ভিডিও গ্যালারি</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('sms'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'sms' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>SMS গেটওয়ে</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('edulinks'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'edulinks' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>শিক্ষা মন্ত্রণালয় পোর্টাল</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('reports'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'reports' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>প্রতিবেদন ও রিপোর্ট</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('excellence'); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-left transition-all ${
+                    activeTab === 'excellence' ? 'bg-[#d9482b] text-white shadow-xs' : 'bg-[#0c3664] text-slate-200 hover:bg-[#144275]'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>মেধা বিকাশ</span>
+                </button>
+              </div>
             </div>
 
             {/* Mobile Drawer Footer Utilities */}
@@ -895,73 +1280,827 @@ export default function App() {
                 </button>
               </div>
 
-              {currentAdmin && (
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => {
                     setActiveTab('office');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="px-2.5 py-1 bg-[#144275] text-amber-200 rounded-lg text-xs font-bold flex items-center gap-1"
+                  className="px-2.5 py-1 bg-[#144275] hover:bg-[#1d5796] text-amber-200 rounded-lg text-xs font-bold flex items-center gap-1 border border-blue-400/40"
+                  title="অফিস ডেস্ক"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
                   <span>অফিস ডেস্ক</span>
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('ai');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="px-2.5 py-1 bg-[#061e38] hover:bg-[#0c3664] text-amber-300 rounded-lg text-xs font-bold flex items-center gap-1 border border-amber-400/40"
+                  title="AI স্ক্যানার"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>AI স্ক্যানার</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Tier 3: Horizontal Swipeable Nav Strip (Zero-overlap guaranteed) */}
-        <nav className="bg-[#092b50] border-t border-[#134377] w-full relative">
-          <div className="max-w-7xl mx-auto px-1 sm:px-2 py-1.5 w-full flex items-center gap-1">
+        {/* Tier 3: Hierarchical Structured Nav Bar with Rich Dropdowns & Controls */}
+        <nav
+          ref={navContainerRef}
+          className="bg-[#092b50] border-t border-[#134377] w-full relative z-30 shadow-inner"
+        >
+          <div className="max-w-7xl mx-auto px-1 sm:px-2 py-1.5 w-full flex items-center gap-1 relative">
+            
+            {/* Left Scroll Button (For narrower screens) */}
             <button
               type="button"
               onClick={() => handleNavScroll('left')}
-              className="hidden lg:flex shrink-0 p-1 text-slate-300 hover:text-white hover:bg-[#123e6e] rounded-md transition-colors"
-              title="বামে স্ক্রল করুন"
-              aria-label="বামে স্ক্রল করুন"
+              disabled={!canScrollLeft}
+              className={`shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg border transition-all ${
+                canScrollLeft
+                  ? 'bg-[#123e6e] hover:bg-[#1a5391] border-blue-400/40 text-amber-300 hover:text-white shadow-xs cursor-pointer active:scale-95'
+                  : 'bg-[#061d36]/40 border-slate-700/40 text-slate-600 opacity-40 cursor-not-allowed'
+              }`}
+              title="মেনু বামে স্ক্রল করুন"
+              aria-label="মেনু বামে স্ক্রল করুন"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <div
-              ref={navScrollRef}
-              className="flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x scroll-smooth"
-            >
-              {navTabsList.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveTab(tab.id as NavTab);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none ${
-                      isActive
-                        ? 'bg-[#d9482b] text-white font-bold shadow-xs'
-                        : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+            {/* Scrollable Container with the ordered main tabs and dropdowns */}
+            <div className="relative flex-1 min-w-0 flex items-center">
+              {canScrollLeft && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#092b50] to-transparent z-10"
+                />
+              )}
+
+              <div
+                ref={navScrollRef}
+                onWheel={handleNavWheel}
+                className="w-full flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none touch-pan-x scroll-smooth py-0.5 pr-2"
+              >
+                {/* 1. হোম (Home) */}
+                <button
+                  type="button"
+                  data-active={activeTab === 'home' ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveTab('home');
+                    setActiveDropdown(null);
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none ${
+                    activeTab === 'home'
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Home className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'home' ? 'text-white' : 'text-amber-300'}`} />
+                  <span>{language === 'bn' ? 'হোম' : 'Home'}</span>
+                </button>
+
+                {/* 2. আমাদের সম্পর্কে ▾ (About Us Dropdown) */}
+                <button
+                  type="button"
+                  data-active={['about', 'committee', 'donors'].includes(activeTab) ? 'true' : undefined}
+                  onClick={(e) => toggleDropdown('about', e)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    ['about', 'committee', 'donors'].includes(activeTab)
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : activeDropdown === 'about'
+                      ? 'bg-[#123e6e] text-amber-300 ring-2 ring-amber-400'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Info className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                  <span>{language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'about' ? 'rotate-180 text-amber-300' : 'text-slate-300'}`} />
+                </button>
+
+                {/* 3. শিক্ষার্থী তথ্য ▾ (Students Dropdown) */}
+                <button
+                  type="button"
+                  data-active={['students', 'exams', 'assembly'].includes(activeTab) ? 'true' : undefined}
+                  onClick={(e) => toggleDropdown('students', e)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    ['students', 'exams', 'assembly'].includes(activeTab)
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : activeDropdown === 'students'
+                      ? 'bg-[#123e6e] text-amber-300 ring-2 ring-amber-400'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                  <span>{language === 'bn' ? 'শিক্ষার্থী তথ্য' : 'Student Info'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'students' ? 'rotate-180 text-amber-300' : 'text-slate-300'}`} />
+                </button>
+
+                {/* 4. শিক্ষক ফোরাম ▾ (Faculty Dropdown) */}
+                <button
+                  type="button"
+                  data-active={['teachers', 'staff'].includes(activeTab) ? 'true' : undefined}
+                  onClick={(e) => toggleDropdown('teachers', e)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    ['teachers', 'staff'].includes(activeTab)
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : activeDropdown === 'teachers'
+                      ? 'bg-[#123e6e] text-amber-300 ring-2 ring-amber-400'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                  <span>{language === 'bn' ? 'শিক্ষক ফোরাম' : "Teachers' Forum"}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'teachers' ? 'rotate-180 text-amber-300' : 'text-slate-300'}`} />
+                </button>
+
+                {/* 5. দৈনিক হাজিরা (Daily Attendance - Direct Tab in Sequence) */}
+                <button
+                  type="button"
+                  data-active={activeTab === 'attendance' ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveTab('attendance');
+                    setActiveDropdown(null);
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    activeTab === 'attendance'
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <UserCheck className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'attendance' ? 'text-white' : 'text-amber-300'}`} />
+                  <span>{language === 'bn' ? 'দৈনিক হাজিরা' : 'Attendance'}</span>
+                </button>
+
+                {/* 6. আয়-ব্যয় হিসাব (Fees & Bank Dashboard) */}
+                <button
+                  type="button"
+                  data-active={activeTab === 'banks' ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveTab('banks');
+                    setActiveDropdown(null);
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    activeTab === 'banks'
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Landmark className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'banks' ? 'text-white' : 'text-amber-300'}`} />
+                  <span>{language === 'bn' ? 'আয়-ব্যয় হিসাব' : 'Fees & Accounts'}</span>
+                </button>
+
+                {/* 7. নোটিশ বোর্ড (Notice Board) */}
+                <button
+                  type="button"
+                  data-active={activeTab === 'notices' ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveTab('notices');
+                    setActiveDropdown(null);
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    activeTab === 'notices'
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Bell className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'notices' ? 'text-white' : 'text-amber-300'}`} />
+                  <span>{language === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board'}</span>
+                </button>
+
+                {/* 8. যোগাযোগ (Contact) */}
+                <button
+                  type="button"
+                  data-active={activeTab === 'contact' ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveTab('contact');
+                    setActiveDropdown(null);
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    activeTab === 'contact'
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Phone className={`w-3.5 h-3.5 shrink-0 ${activeTab === 'contact' ? 'text-white' : 'text-amber-300'}`} />
+                  <span>{language === 'bn' ? 'যোগাযোগ' : 'Contact'}</span>
+                </button>
+
+                {/* 9. অন্যান্য সেবা ▾ (More Dropdown) */}
+                <button
+                  type="button"
+                  data-active={['parents', 'gallery', 'sms', 'edulinks', 'reports', 'excellence'].includes(activeTab) ? 'true' : undefined}
+                  onClick={(e) => toggleDropdown('more', e)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg whitespace-nowrap transition-all text-xs font-semibold select-none cursor-pointer ${
+                    ['parents', 'gallery', 'sms', 'edulinks', 'reports', 'excellence'].includes(activeTab)
+                      ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-white/20'
+                      : activeDropdown === 'more'
+                      ? 'bg-[#123e6e] text-amber-300 ring-2 ring-amber-400'
+                      : 'text-slate-200 hover:text-white hover:bg-[#123e6e]'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-300" />
+                  <span>{language === 'bn' ? 'অন্যান্য সেবা' : 'More'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'more' ? 'rotate-180 text-amber-300' : 'text-slate-300'}`} />
+                </button>
+              </div>
+
+              {canScrollRight && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#092b50] to-transparent z-10"
+                />
+              )}
             </div>
 
+            {/* Right Scroll Button */}
             <button
               type="button"
               onClick={() => handleNavScroll('right')}
-              className="hidden lg:flex shrink-0 p-1 text-slate-300 hover:text-white hover:bg-[#123e6e] rounded-md transition-colors"
-              title="ডানে স্ক্রল করুন"
-              aria-label="ডানে স্ক্রল করুন"
+              disabled={!canScrollRight}
+              className={`shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg border transition-all ${
+                canScrollRight
+                  ? 'bg-[#123e6e] hover:bg-[#1a5391] border-amber-400/50 text-amber-300 hover:text-white shadow-xs cursor-pointer active:scale-95'
+                  : 'bg-[#061d36]/40 border-slate-700/40 text-slate-600 opacity-40 cursor-not-allowed'
+              }`}
+              title="মেনু ডানে স্ক্রল করুন"
+              aria-label="মেনু ডানে স্ক্রল করুন"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
+
+            {/* All Menus Dropdown Quick Button */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAllMenuDropdown(!showAllMenuDropdown);
+                  setActiveDropdown(null);
+                }}
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                  showAllMenuDropdown
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                    : 'bg-[#061d36] hover:bg-[#123e6e] text-amber-300 hover:text-white border-[#1d4c82]'
+                }`}
+                title="সকল ১৯টি মেনুর তালিকা দেখুন"
+              >
+                <LayoutGrid className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="hidden xl:inline">{language === 'bn' ? 'সকল মেনু' : 'All Menus'}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${showAllMenuDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* All Menus Dropdown Popover */}
+              {showAllMenuDropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-2xs"
+                    onClick={() => setShowAllMenuDropdown(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[80vh] overflow-y-auto bg-[#07213d] border-2 border-amber-400 rounded-2xl shadow-2xl z-50 p-3 sm:p-4 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#144275]">
+                      <div className="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wide">
+                        <LayoutGrid className="w-4 h-4" />
+                        <span>{language === 'bn' ? 'সম্পূর্ণ মেনু তালিকা (১৯টি বিভাগ)' : 'Complete Navigation Menu'}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAllMenuDropdown(false)}
+                        className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#144275]"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {navTabsList.map(tab => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => {
+                              setActiveTab(tab.id as NavTab);
+                              setShowAllMenuDropdown(false);
+                            }}
+                            className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold text-left transition-all ${
+                              isActive
+                                ? 'bg-[#d9482b] text-white shadow-xs font-bold'
+                                : 'bg-[#0c3664] hover:bg-[#144275] text-slate-200 hover:text-white'
+                            }`}
+                          >
+                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-300'}`} />
+                            <span className="truncate">{tab.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Floating Dropdown Popover (Attached outside overflow container so it is NEVER clipped) */}
+            {activeDropdown && (
+              <>
+                <div
+                  className="fixed inset-0 z-40 bg-black/25 backdrop-blur-2xs"
+                  onClick={() => setActiveDropdown(null)}
+                />
+
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: `${dropdownCoords.top}px`,
+                    left: `${dropdownCoords.left}px`,
+                    width: '330px',
+                    maxWidth: 'calc(100vw - 24px)'
+                  }}
+                  className="z-50 bg-[#07213d] border-2 border-amber-400 rounded-2xl shadow-2xl p-2.5 animate-in fade-in zoom-in-95 duration-150 space-y-1"
+                >
+                  {/* Dropdown 1: আমাদের সম্পর্কে */}
+                  {activeDropdown === 'about' && (
+                    <>
+                      <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-[#144275] px-1">
+                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                          <Info className="w-3.5 h-3.5 text-amber-300" />
+                          <span>আমাদের সম্পর্কে মেনু</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveDropdown(null)}
+                          className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('about');
+                          setAboutInitialSection('overview');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'about' && aboutInitialSection === 'overview'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <BookOpen className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">📖 বিস্তারিত বিবরণ ও পরিচিতি</div>
+                          <div className="text-[10px] text-slate-300">বিদ্যালয়ের ইতিহাস, ঐতিহ্য ও অবকাঠামো</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('about');
+                          setAboutInitialSection('headmasters');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'about' && aboutInitialSection === 'headmasters'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs ring-1 ring-amber-300'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <History className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>📜 ১ম থেকে বর্তমান প্রধান শিক্ষকের তথ্যাবলী</span>
+                            <span className="text-[9px] bg-amber-400 text-slate-950 px-1 rounded font-bold font-mono">সময়কাল</span>
+                          </div>
+                          <div className="text-[10px] text-slate-300">১৯৬৪ সাল থেকে বর্তমান পর্যন্ত প্রধান শিক্ষকগণের ইতিহাস</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('committee');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'committee'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Award className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">🎖️ বর্তমান বিদ্যালয় পরিচালনা কমিটি</div>
+                          <div className="text-[10px] text-slate-300">সভাপতি ও সম্মানিত পরিচালনা পর্ষদ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('donors');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'donors'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <HeartHandshake className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">🤝 বিদ্যালয়ের দাতা ও প্রতিষ্ঠাতা তথ্য</div>
+                          <div className="text-[10px] text-slate-300">ভূমিদাতা, আজীবন দাতা ও প্রতিষ্ঠাতাদের তালিকা</div>
+                        </div>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dropdown 2: শিক্ষার্থী তথ্য */}
+                  {activeDropdown === 'students' && (
+                    <>
+                      <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-[#144275] px-1">
+                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                          <GraduationCap className="w-3.5 h-3.5 text-amber-300" />
+                          <span>শিক্ষার্থী তথ্য ও ভর্তি</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveDropdown(null)}
+                          className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAdmissionModal(true);
+                          setActiveDropdown(null);
+                        }}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-left bg-gradient-to-r from-emerald-800 to-teal-800 hover:from-emerald-700 hover:to-teal-700 text-white font-bold shadow-xs transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <UserPlus className="w-4 h-4 text-emerald-300 shrink-0" />
+                          <div>
+                            <div className="font-bold">📝 ভর্তির আবেদন (অনলাইন)</div>
+                            <div className="text-[10px] text-emerald-200">৬ষ্ঠ থেকে ৯ম শ্রেণির ভর্তি ফরম</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">উন্মুক্ত</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('students');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'students'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Users className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">👥 শিক্ষার্থী তালিকা ও ডিরেক্টরি</div>
+                          <div className="text-[10px] text-slate-300">৬ষ্ঠ থেকে ১০ম শ্রেণি, শাখা ক-ঘ ও বিভাগ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('exams');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'exams'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Award className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">📊 পরীক্ষা ও ফলাফল</div>
+                          <div className="text-[10px] text-slate-300">নম্বর ফর্দ, টেবুলেশন ও প্রবেশপত্র</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('attendance');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'attendance'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <UserCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">⏱️ দৈনিক হাজিরা পোর্টাল</div>
+                          <div className="text-[10px] text-slate-300">ডিজিটাল উপস্থিতি ও SMS সংরক্ষণ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('assembly');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'assembly'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Sun className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">🌅 প্রাত্যহিক সমাবেশ ও শপথ</div>
+                          <div className="text-[10px] text-slate-300">জাতীয় সংগীত, শপথ ও সাপ্তাহিক রুটিন</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('ai');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'ai'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>🤖 AI স্ক্যানার ও বাল্ক ডাটা ইম্পোর্ট</span>
+                            <span className="text-[9px] bg-amber-400 text-slate-950 px-1 rounded font-bold">স্মার্ট</span>
+                          </div>
+                          <div className="text-[10px] text-slate-300">ছবি/পিডিএফ বা তালিকা দিয়ে বাল্ক শিক্ষার্থী এন্ট্রি</div>
+                        </div>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dropdown 3: শিক্ষক ফোরাম */}
+                  {activeDropdown === 'teachers' && (
+                    <>
+                      <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-[#144275] px-1">
+                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-amber-300" />
+                          <span>শিক্ষক ফোরাম ও কর্মচারী</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveDropdown(null)}
+                          className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('teachers');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'teachers'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Users className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">👨‍🏫 শিক্ষক ফোরাম ও পরিষদ</div>
+                          <div className="text-[10px] text-slate-300">শিক্ষকগণের পরিচিতি, পদবি ও দায়িত্ব</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('staff');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'staff'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">🛡️ কর্মচারী তথ্য ডিরেক্টরি</div>
+                          <div className="text-[10px] text-slate-300">অফিস সহকারী ও সহায়ক কর্মচারীবৃন্দ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('office');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'office'
+                            ? 'bg-[#d9482b] text-white font-bold shadow-xs'
+                            : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>🏢 অফিস ডেস্ক ও ইনপুট প্যানেল</span>
+                            <span className="text-[9px] bg-blue-500 text-white px-1 rounded font-bold">এডমিন</span>
+                          </div>
+                          <div className="text-[10px] text-slate-300">শিক্ষার্থী, নম্বর, ফি ও নোটিশ প্রশাসনিক এন্ট্রি</div>
+                        </div>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dropdown 4: অন্যান্য সেবা */}
+                  {activeDropdown === 'more' && (
+                    <>
+                      <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-[#144275] px-1">
+                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                          <span>অন্যান্য সেবা ও সহশিক্ষা</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveDropdown(null)}
+                          className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('parents');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'parents' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <MessageCircle className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">💬 অভিভাবকের কলাম</div>
+                          <div className="text-[10px] text-slate-300">মতামত, পরামর্শ ও গঠনমূলক প্রতিক্রিয়া</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('gallery');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'gallery' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <ImageIcon className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">📸 ফটো ও ভিডিও গ্যালারি</div>
+                          <div className="text-[10px] text-slate-300">বার্ষিক ক্রীড়া, সাংস্কৃতিক উৎসব ও স্মৃতি</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('sms');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'sms' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <MessageCircle className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">📱 SMS নোটিফিকেশন গেটওয়ে</div>
+                          <div className="text-[10px] text-slate-300">অভিভাবকদের জরুরি বার্তা ও নোটিশ প্রেরণ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('edulinks');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'edulinks' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Globe className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">🌐 শিক্ষা মন্ত্রণালয় ও বোর্ড লিংক</div>
+                          <div className="text-[10px] text-slate-300">সরকারি সার্কুলার ও পোর্টাল সংযোগ</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('reports');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'reports' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <TrendingUp className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">📈 মাসিক ও বাৎসরিক রিপোর্ট</div>
+                          <div className="text-[10px] text-slate-300">উপস্থিতি, ফি ও প্রাতিষ্ঠানিক পরিসংখ্যান</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('excellence');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'excellence' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold">✨ প্রশিক্ষণ ও মেধা বিকাশ</div>
+                          <div className="text-[10px] text-slate-300">আইসিটি স্কিল ও বিশেষ উৎকর্ষ কেন্দ্র</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('office');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'office' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>🏢 অফিস ডেস্ক ও এডমিন প্যানেল</span>
+                            <span className="text-[9px] bg-blue-500 text-white px-1 rounded font-bold">এডমিন</span>
+                          </div>
+                          <div className="text-[10px] text-slate-300">সকল দাপ্তরিক তথ্য এন্ট্রি ও পরিচালনা কেন্দ্র</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('ai');
+                          setActiveDropdown(null);
+                        }}
+                        className={`w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                          activeTab === 'ai' ? 'bg-[#d9482b] text-white font-bold shadow-xs' : 'hover:bg-[#144275] text-slate-200 hover:text-white'
+                        }`}
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5">
+                            <span>🤖 AI স্ক্যানার ও বাল্ক ডাটা হাব</span>
+                            <span className="text-[9px] bg-amber-400 text-slate-950 px-1 rounded font-bold">স্মার্ট</span>
+                          </div>
+                          <div className="text-[10px] text-slate-300">ব্যাংক স্টেটমেন্ট ও শিক্ষার্থী বাল্ক অটো-সিঙ্ক</div>
+                        </div>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
           </div>
         </nav>
 
@@ -1008,7 +2147,7 @@ export default function App() {
                     activeTab === 'notices' ? 'জরুরি বার্তা ও নোটিশ বোর্ড' :
                     activeTab === 'teachers' ? 'শিক্ষক ফোরাম' :
                     activeTab === 'staff' ? 'কর্মচারী তথ্য' :
-                    activeTab === 'parents' ? 'অভিভাবক কলাম' :
+                    activeTab === 'parents' ? 'অভিভাবকের কলাম' :
                     activeTab === 'edulinks' ? 'শিক্ষা লিংক' :
                     activeTab === 'banks' ? 'ফি ও আয়-ব্যয় হিসাব (ক্যাশ বুক ও ব্যাংক ড্যাশবোর্ড)' :
                     activeTab === 'office' ? 'এডমিন ইনপুট ও অফিস' :
@@ -1066,6 +2205,7 @@ export default function App() {
             onOpenEditHeadmaster={currentAdmin ? () => setShowHeadmasterEditModal(true) : undefined}
             presidentData={presidentData}
             onOpenEditPresident={currentAdmin ? () => setShowPresidentEditModal(true) : undefined}
+            initialSection={aboutInitialSection}
           />
         )}
 
@@ -1260,6 +2400,7 @@ export default function App() {
             setTransactions={setTransactions}
             onOpenEditHeadmaster={() => setShowHeadmasterEditModal(true)}
             onOpenAdminUsersModal={() => setShowAdminUsersModal(true)}
+            onNavigateToAiScanner={() => setActiveTab('ai')}
           />
         )}
 
@@ -1285,8 +2426,8 @@ export default function App() {
               <div className="flex items-center gap-3">
                 <SchoolLogo size={50} className="shadow-md" />
                 <div>
-                  <div className="font-bold text-base text-white">নাপোড়া শেখেরখীল উচ্চ বিদ্যালয়</div>
-                  <div className="text-xs text-amber-300 italic font-semibold">"পড় স্রষ্টার নামে"</div>
+                  <div className="text-xs text-amber-300 italic font-semibold mb-0.5">"পড় স্রষ্টার নামে"</div>
+                  <div className="font-bold text-base text-white leading-tight">নাপোড়া শেখেরখীল উচ্চ বিদ্যালয়</div>
                 </div>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed max-w-md">
@@ -1327,7 +2468,7 @@ export default function App() {
                   {language === 'bn' ? 'ফটো ও ভিডিও গ্যালারি' : 'Gallery'}
                 </button>
                 <button type="button" onClick={() => setActiveTab('parents')} className="hover:text-white text-left">
-                  {language === 'bn' ? 'অভিভাবক কলাম' : 'Parents'}
+                  {language === 'bn' ? 'অভিভাবকের কলাম' : "Parents' Column"}
                 </button>
                 <button type="button" onClick={() => setActiveTab('notices')} className="hover:text-white text-left">
                   {language === 'bn' ? 'নোটিশ বোর্ড' : 'Notices'}
