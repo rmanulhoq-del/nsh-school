@@ -612,18 +612,16 @@ export default function StudentsTab({
               <span>রেজিস্টার প্রিন্ট</span>
             </button>
 
-            {/* ADD STUDENT BUTTON (ADMIN ONLY) */}
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleOpenAddModal}
-                className="px-4 py-2 bg-[#d9482b] hover:bg-[#b8381e] text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-xs hover:shadow-md transition-all"
-                title="নতুন শিক্ষার্থী ভর্তি বা তথ্য এন্ট্রি করুন"
-              >
-                <UserPlus className="w-4 h-4 text-white" />
-                <span>+ নতুন শিক্ষার্থী ভর্তি / যোগ করুন</span>
-              </button>
-            )}
+            {/* ADD STUDENT BUTTON (ALWAYS ACCESSIBLE) */}
+            <button
+              type="button"
+              onClick={handleOpenAddModal}
+              className="px-4 py-2 bg-[#d9482b] hover:bg-[#b8381e] text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-xs hover:shadow-md transition-all cursor-pointer"
+              title="নতুন শিক্ষার্থী ভর্তি বা তথ্য ডাটাবেসে এন্ট্রি করুন"
+            >
+              <UserPlus className="w-4 h-4 text-white" />
+              <span>+ নতুন শিক্ষার্থী ভর্তি / এন্ট্রি করুন</span>
+            </button>
           </div>
         </div>
 
@@ -781,7 +779,7 @@ export default function StudentsTab({
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  {sec === 'all' ? 'সকল শাখা' : `শাখা '${sec === 'A' ? 'এ' : sec === 'B' ? 'বি' : sec === 'C' ? 'সি' : 'ডি'}' (${sec})`}
+                  {sec === 'all' ? 'সকল শাখা' : `শাখা '${sec === 'A' ? 'ক' : sec === 'B' ? 'খ' : sec === 'C' ? 'গ' : 'ঘ'}' (${sec})`}
                 </button>
               ))}
 
@@ -806,6 +804,43 @@ export default function StudentsTab({
                   {g.label}
                 </button>
               ))}
+            </div>
+
+            {/* Quick Combined Section + Gender Buttons (যেমন: ৬ষ্ঠ ক ছাত্র, ৬ষ্ঠ ক ছাত্রী) */}
+            <div className="flex flex-wrap items-center gap-1.5 w-full pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 flex items-center gap-1">
+                <span>🏷️ সেকশন ও ছাত্র/ছাত্রী আলাদা:</span>
+              </span>
+              {[
+                { sec: 'A', g: 'male', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} ক ছাত্র`, icon: '👦' },
+                { sec: 'A', g: 'female', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} ক ছাত্রী`, icon: '👧' },
+                { sec: 'B', g: 'male', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} খ ছাত্র`, icon: '👦' },
+                { sec: 'B', g: 'female', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} খ ছাত্রী`, icon: '👧' },
+                { sec: 'C', g: 'male', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} গ ছাত্র`, icon: '👦' },
+                { sec: 'C', g: 'female', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} গ ছাত্রী`, icon: '👧' },
+                { sec: 'D', g: 'male', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} ঘ ছাত্র`, icon: '👦' },
+                { sec: 'D', g: 'female', label: `${selectedClass !== 'all' ? selectedClass + 'ম' : ''} ঘ ছাত্রী`, icon: '👧' },
+              ].map(b => {
+                const isActive = selectedSection === b.sec && selectedGender === b.g;
+                return (
+                  <button
+                    key={`${b.sec}-${b.g}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSection(b.sec);
+                      setSelectedGender(b.g as any);
+                    }}
+                    className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all border flex items-center gap-1 ${
+                      isActive
+                        ? 'bg-[#0c3664] text-white border-[#0c3664] shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>{b.icon}</span>
+                    <span>{b.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {(selectedClass !== 'all' || selectedSection !== 'all' || selectedGender !== 'all' || selectedGroup !== 'all' || searchQuery) && (
@@ -936,7 +971,10 @@ export default function StudentsTab({
                           ? 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-300'
                           : 'bg-blue-100 text-blue-800 border border-blue-300'
                       }`}>
-                        {student.gender === 'female' ? '👧 ছাত্রী' : '👦 ছাত্র'}
+                        {student.gender === 'female' ? '👧 ছাত্রী শাখা' : '👦 ছাত্র শাখা'}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-[#0c3664] text-white shadow-2xs">
+                        🏷️ {formatClassBangla(student.className)} {student.section === 'A' ? 'ক' : student.section === 'B' ? 'খ' : student.section === 'C' ? 'গ' : 'ঘ'} ({student.gender === 'female' ? 'ছাত্রী' : 'ছাত্র'})
                       </span>
                     </div>
 
@@ -962,7 +1000,7 @@ export default function StudentsTab({
                     )}
 
                     <div className="text-xs text-slate-600 mt-1">
-                      শ্রেণি: <strong className="text-slate-900">{formatClassBangla(student.className)}</strong> · শাখা: <strong className="text-slate-900">{student.section}</strong> · রোল: <strong className="text-slate-900 font-mono">#{student.roll}</strong>
+                      শ্রেণি: <strong className="text-slate-900">{formatClassBangla(student.className)}</strong> · শাখা: <strong className="text-slate-900">শাখা '{student.section === 'A' ? 'ক' : student.section === 'B' ? 'খ' : student.section === 'C' ? 'গ' : 'ঘ'}' ({student.section})</strong> · রোল: <strong className="text-red-600 font-mono font-black text-sm">#{student.roll}</strong>
                     </div>
                   </div>
 
@@ -1281,7 +1319,7 @@ export default function StudentsTab({
                       <button
                         type="button"
                         onClick={() => {
-                          setNewStudentRoll(getNextAvailableRoll(newStudentClass, newStudentSection));
+                          setNewStudentRoll(getNextAvailableRoll(newStudentClass, newStudentSection, newStudentGender));
                           setAddModalError(null);
                         }}
                         className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-xs transition-colors flex items-center gap-1.5"
@@ -1316,7 +1354,7 @@ export default function StudentsTab({
                     onChange={(e) => {
                       const cls = e.target.value as any;
                       setNewStudentClass(cls);
-                      setNewStudentRoll(getNextAvailableRoll(cls, newStudentSection));
+                      setNewStudentRoll(getNextAvailableRoll(cls, newStudentSection, newStudentGender));
                       setAddModalError(null);
                     }}
                     className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-bold"
@@ -1330,22 +1368,86 @@ export default function StudentsTab({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">শাখা (Section) *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">শাখা (Section ক, খ, গ, ঘ) *</label>
                   <select
                     value={newStudentSection}
                     onChange={(e) => {
                       const sec = e.target.value as any;
                       setNewStudentSection(sec);
-                      setNewStudentRoll(getNextAvailableRoll(newStudentClass, sec));
+                      setNewStudentRoll(getNextAvailableRoll(newStudentClass, sec, newStudentGender));
                       setAddModalError(null);
                     }}
                     className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-bold"
                   >
-                    <option value="A">শাখা A</option>
-                    <option value="B">শাখা B</option>
-                    <option value="C">শাখা C</option>
-                    <option value="D">শাখা D</option>
+                    <option value="A">শাখা: ক (Section A)</option>
+                    <option value="B">শাখা: খ (Section B)</option>
+                    <option value="C">শাখা: গ (Section C)</option>
+                    <option value="D">শাখা: ঘ (Section D)</option>
                   </select>
+                </div>
+
+                {/* লিঙ্গ (Gender) */}
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">লিঙ্গ (ছাত্র / ছাত্রী) *</label>
+                  <select
+                    value={newStudentGender}
+                    onChange={(e) => {
+                      const g = e.target.value as StudentGender;
+                      setNewStudentGender(g);
+                      setNewStudentRoll(getNextAvailableRoll(newStudentClass, newStudentSection, g));
+                      setAddModalError(null);
+                    }}
+                    className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-semibold"
+                  >
+                    <option value="male">👦 ছাত্র (Male)</option>
+                    <option value="female">👧 ছাত্রী (Female)</option>
+                  </select>
+                </div>
+
+                {/* Quick Branch Preset: যেমন ৬ষ্ঠ ক ছাত্র, ৬ষ্ঠ ক ছাত্রী ইত্যাদি */}
+                <div className="sm:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-700">
+                      🏷️ দ্রুত শাখা ও ছাত্র/ছাত্রী নির্ধারণ ({newStudentClass}ম শ্রেণি):
+                    </span>
+                    <span className="text-emerald-700 font-bold">
+                      স্বতন্ত্র রোল ১ থেকে শুরু
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                    {[
+                      { sec: 'A' as const, g: 'male' as const, label: `${newStudentClass}ম ক ছাত্র`, icon: '👦' },
+                      { sec: 'A' as const, g: 'female' as const, label: `${newStudentClass}ম ক ছাত্রী`, icon: '👧' },
+                      { sec: 'B' as const, g: 'male' as const, label: `${newStudentClass}ম খ ছাত্র`, icon: '👦' },
+                      { sec: 'B' as const, g: 'female' as const, label: `${newStudentClass}ম খ ছাত্রী`, icon: '👧' },
+                      { sec: 'C' as const, g: 'male' as const, label: `${newStudentClass}ম গ ছাত্র`, icon: '👦' },
+                      { sec: 'C' as const, g: 'female' as const, label: `${newStudentClass}ম গ ছাত্রী`, icon: '👧' },
+                      { sec: 'D' as const, g: 'male' as const, label: `${newStudentClass}ম ঘ ছাত্র`, icon: '👦' },
+                      { sec: 'D' as const, g: 'female' as const, label: `${newStudentClass}ম ঘ ছাত্রী`, icon: '👧' },
+                    ].map(item => {
+                      const isCurrent = newStudentSection === item.sec && newStudentGender === item.g;
+                      return (
+                        <button
+                          key={`${item.sec}-${item.g}`}
+                          type="button"
+                          onClick={() => {
+                            setNewStudentSection(item.sec);
+                            setNewStudentGender(item.g);
+                            setNewStudentRoll(getNextAvailableRoll(newStudentClass, item.sec, item.g));
+                            setAddModalError(null);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-center border flex items-center justify-center gap-1 ${
+                            isCurrent
+                              ? 'bg-[#0c3664] text-white border-[#0c3664] shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* বিভাগ নির্বাচন (Class 9 & 10) */}
@@ -1402,28 +1504,15 @@ export default function StudentsTab({
                       <button
                         type="button"
                         onClick={() => {
-                          setNewStudentRoll(getNextAvailableRoll(newStudentClass, newStudentSection));
+                          setNewStudentRoll(getNextAvailableRoll(newStudentClass, newStudentSection, newStudentGender));
                           setAddModalError(null);
                         }}
                         className="px-2 py-0.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded text-[10px] shrink-0"
                       >
-                        খালি রোল {getNextAvailableRoll(newStudentClass, newStudentSection)} দিন
+                        খালি রোল {getNextAvailableRoll(newStudentClass, newStudentSection, newStudentGender)} দিন
                       </button>
                     </div>
                   )}
-                </div>
-
-                {/* লিঙ্গ (Gender) */}
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">লিঙ্গ (Gender) *</label>
-                  <select
-                    value={newStudentGender}
-                    onChange={(e) => setNewStudentGender(e.target.value as StudentGender)}
-                    className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-semibold"
-                  >
-                    <option value="male">ছাত্র (ছেলে)</option>
-                    <option value="female">ছাত্রী (মেয়ে)</option>
-                  </select>
                 </div>
 
                 <div>
@@ -1582,16 +1671,16 @@ export default function StudentsTab({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 block mb-1">শাখা (Section) *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">শাখা (Section ক, খ, গ, ঘ) *</label>
                   <select
                     value={editStudentSection}
                     onChange={(e) => setEditStudentSection(e.target.value as any)}
                     className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-semibold"
                   >
-                    <option value="A">শাখা A</option>
-                    <option value="B">শাখা B</option>
-                    <option value="C">শাখা C</option>
-                    <option value="D">শাখা D</option>
+                    <option value="A">শাখা: ক (Section A)</option>
+                    <option value="B">শাখা: খ (Section B)</option>
+                    <option value="C">শাখা: গ (Section C)</option>
+                    <option value="D">শাখা: ঘ (Section D)</option>
                   </select>
                 </div>
 

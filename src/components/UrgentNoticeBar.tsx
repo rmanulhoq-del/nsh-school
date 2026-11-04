@@ -221,7 +221,7 @@ export default function UrgentNoticeBar({
     <>
       {/* Ticker Bar Container */}
       <div className="w-full bg-white border-y border-red-200/90 shadow-2xs relative z-30 transition-all select-none ticker-container">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between gap-2 overflow-hidden">
           
           {/* Left: Distinctive Red Badge + Manage Buttons */}
           <div className="flex items-center gap-1.5 shrink-0">

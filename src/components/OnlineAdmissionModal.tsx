@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   UserPlus,
@@ -18,14 +18,16 @@ interface OnlineAdmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddStudent: (newStudent: Student) => void;
-  existingCount: number;
+  existingCount?: number;
+  students?: Student[];
 }
 
 export default function OnlineAdmissionModal({
   isOpen,
   onClose,
   onAddStudent,
-  existingCount
+  existingCount = 0,
+  students = []
 }: OnlineAdmissionModalProps) {
   const [name, setName] = useState('');
   const [className, setClassName] = useState<'6' | '7' | '8' | '9' | '10'>('6');
@@ -40,9 +42,67 @@ export default function OnlineAdmissionModal({
   const [birthDate, setBirthDate] = useState('2013-05-15');
   const [birthRegNo, setBirthRegNo] = useState('');
   const [monthlyFee, setMonthlyFee] = useState<number>(500);
-  const [roll, setRoll] = useState<number>(existingCount + 1);
 
+  // Helper to calculate the next available roll number in a specific class, section and gender (Boys and Girls separate roll 1)
+  const getNextAvailableRoll = (cls: string, sec: string, g: 'male' | 'female') => {
+    const existingRolls = students
+      .filter(s => s.className === cls && s.section === sec && s.gender === g && !s.tcIssued)
+      .map(s => s.roll);
+    if (existingRolls.length === 0) return 1;
+    let next = 1;
+    while (existingRolls.includes(next)) {
+      next++;
+    }
+    return next;
+  };
+
+  const [roll, setRoll] = useState<number>(() => getNextAvailableRoll('6', 'A', 'male'));
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [submittedStudent, setSubmittedStudent] = useState<Student | null>(null);
+
+  // Auto-update roll when class, section, or gender changes
+  const handleClassChange = (newCls: '6' | '7' | '8' | '9' | '10') => {
+    setClassName(newCls);
+    const nextRoll = getNextAvailableRoll(newCls, section, gender);
+    setRoll(nextRoll);
+  };
+
+  const handleSectionChange = (newSec: 'A' | 'B' | 'C' | 'D') => {
+    setSection(newSec);
+    const nextRoll = getNextAvailableRoll(className, newSec, gender);
+    setRoll(nextRoll);
+  };
+
+  const handleGenderChange = (newGender: 'male' | 'female') => {
+    setGender(newGender);
+    const nextRoll = getNextAvailableRoll(className, section, newGender);
+    setRoll(nextRoll);
+  };
+
+  // Quick preset: Select both section and gender together (e.g. ক ছাত্র, ক ছাত্রী)
+  const handleQuickBranchSelect = (targetSec: 'A' | 'B' | 'C' | 'D', targetGender: 'male' | 'female') => {
+    setSection(targetSec);
+    setGender(targetGender);
+    const nextRoll = getNextAvailableRoll(className, targetSec, targetGender);
+    setRoll(nextRoll);
+  };
+
+  // Re-check roll conflicts
+  useEffect(() => {
+    if (!roll || roll <= 0) return;
+    const existing = students.find(
+      s => s.className === className && s.section === section && s.gender === gender && s.roll === Number(roll) && !s.tcIssued
+    );
+    if (existing) {
+      const gLabel = gender === 'female' ? 'ছাত্রী' : 'ছাত্র';
+      const nextRoll = getNextAvailableRoll(className, section, gender);
+      setDuplicateWarning(
+        `সতর্কতা: ${className}ম শ্রেণি, শাখা ${section} (${gLabel})-এ রোল #${roll} ইতিমধ্যে "${existing.name}"-এর নামে নিবন্ধিত। পরবর্তী খালি রোল: ${nextRoll}`
+      );
+    } else {
+      setDuplicateWarning(null);
+    }
+  }, [students, className, section, gender, roll]);
 
   if (!isOpen) return null;
 
@@ -50,13 +110,15 @@ export default function OnlineAdmissionModal({
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newId = `STU-${className}${section}-${String(roll).padStart(3, '0')}`;
+    const gCode = gender === 'female' ? 'G' : 'B';
+    const rollNum = Number(roll) || 1;
+    const newId = `STU-${className}${section}-${gCode}${String(rollNum).padStart(3, '0')}`;
     const newStudent: Student = {
       id: newId,
       name: name.trim(),
       className,
       section,
-      roll: Number(roll) || existingCount + 1,
+      roll: rollNum,
       gender,
       group: Number(className) >= 9 ? group : undefined,
       fatherName: fatherName.trim() || undefined,
@@ -190,7 +252,7 @@ export default function OnlineAdmissionModal({
                     <label className="block text-xs font-bold text-slate-700 mb-1">ভর্তিচ্ছু শ্রেণি</label>
                     <select
                       value={className}
-                      onChange={e => setClassName(e.target.value as any)}
+                      onChange={e => handleClassChange(e.target.value as any)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
                     >
                       <option value="6">৬ষ্ঠ শ্রেণি</option>
@@ -202,19 +264,104 @@ export default function OnlineAdmissionModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">শাখা</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">শাখা (ক, খ, গ, ঘ)</label>
                     <select
                       value={section}
-                      onChange={e => setSection(e.target.value as any)}
+                      onChange={e => handleSectionChange(e.target.value as any)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
                     >
-                      <option value="A">শাখা: ক (A)</option>
-                      <option value="B">শাখা: খ (B)</option>
+                      <option value="A">শাখা: ক (Section A)</option>
+                      <option value="B">শাখা: খ (Section B)</option>
+                      <option value="C">শাখা: গ (Section C)</option>
+                      <option value="D">শাখা: ঘ (Section D)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">শ্রেণি রোল নম্বর</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">শিক্ষার্থীর লিঙ্গ (ছাত্র / ছাত্রী)</label>
+                    <select
+                      value={gender}
+                      onChange={e => handleGenderChange(e.target.value as any)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
+                    >
+                      <option value="male">👦 ছাত্র (Male)</option>
+                      <option value="female">👧 ছাত্রী (Female)</option>
+                    </select>
+                  </div>
+
+                  {/* Group Selector for Class 9 and 10 */}
+                  {(className === '9' || className === '10') && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                        <span>বিভাগ / গ্রুপ</span>
+                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">৯ম ও ১০ম</span>
+                      </label>
+                      <select
+                        value={group}
+                        onChange={e => setGroup(e.target.value as any)}
+                        className="w-full px-3 py-2 border border-amber-300 rounded-lg text-xs font-bold text-amber-950 bg-amber-50/70 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
+                      >
+                        <option value="science">🧪 বিজ্ঞান বিভাগ (Science Group)</option>
+                        <option value="humanities">📚 মানবিক বিভাগ (Humanities Group)</option>
+                        <option value="business">💼 ব্যবসায় শিক্ষা (Business Studies)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Explicit Boys / Girls Section Preset Quick Selector */}
+                  <div className="sm:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <span>🏷️ দ্রুত শাখা ও ছাত্র/ছাত্রী রূপ নির্বাচন:</span>
+                        <span className="text-emerald-700 font-extrabold">
+                          [{className}ম {section === 'A' ? 'ক' : section === 'B' ? 'খ' : section === 'C' ? 'গ' : 'ঘ'} {gender === 'male' ? 'ছাত্র' : 'ছাত্রী'}]
+                        </span>
+                      </span>
+                      <span className="text-[10px] text-slate-500">স্বতন্ত্র রোল ১ থেকে শুরু</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                      {[
+                        { sec: 'A' as const, g: 'male' as const, label: `${className}ম ক ছাত্র`, icon: '👦' },
+                        { sec: 'A' as const, g: 'female' as const, label: `${className}ম ক ছাত্রী`, icon: '👧' },
+                        { sec: 'B' as const, g: 'male' as const, label: `${className}ম খ ছাত্র`, icon: '👦' },
+                        { sec: 'B' as const, g: 'female' as const, label: `${className}ম খ ছাত্রী`, icon: '👧' },
+                        { sec: 'C' as const, g: 'male' as const, label: `${className}ম গ ছাত্র`, icon: '👦' },
+                        { sec: 'C' as const, g: 'female' as const, label: `${className}ম গ ছাত্রী`, icon: '👧' },
+                        { sec: 'D' as const, g: 'male' as const, label: `${className}ম ঘ ছাত্র`, icon: '👦' },
+                        { sec: 'D' as const, g: 'female' as const, label: `${className}ম ঘ ছাত্রী`, icon: '👧' },
+                      ].map(item => {
+                        const isCurrent = section === item.sec && gender === item.g;
+                        return (
+                          <button
+                            key={`${item.sec}-${item.g}`}
+                            type="button"
+                            onClick={() => handleQuickBranchSelect(item.sec, item.g)}
+                            className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-center border flex items-center justify-center gap-1 ${
+                              isCurrent
+                                ? 'bg-[#0c3664] text-white border-[#0c3664] shadow-xs'
+                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-slate-700">শ্রেণি রোল নম্বর</label>
+                      <button
+                        type="button"
+                        onClick={() => setRoll(getNextAvailableRoll(className, section, gender))}
+                        className="text-[10px] text-emerald-700 hover:text-emerald-800 font-bold underline"
+                      >
+                        খালি রোল দিন (#{getNextAvailableRoll(className, section, gender)})
+                      </button>
+                    </div>
                     <input
                       type="number"
                       required
@@ -225,17 +372,18 @@ export default function OnlineAdmissionModal({
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">শিক্ষার্থীর লিঙ্গ</label>
-                    <select
-                      value={gender}
-                      onChange={e => setGender(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
-                    >
-                      <option value="male">ছাত্র (Male)</option>
-                      <option value="female">ছাত্রী (Female)</option>
-                    </select>
-                  </div>
+                  {duplicateWarning && (
+                    <div className="sm:col-span-2 p-2.5 bg-amber-50 border border-amber-300 text-amber-900 rounded-lg text-xs flex items-center justify-between gap-2">
+                      <span>{duplicateWarning}</span>
+                      <button
+                        type="button"
+                        onClick={() => setRoll(getNextAvailableRoll(className, section, gender))}
+                        className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded text-[11px] shrink-0"
+                      >
+                        খালি রোলে সেট করুন
+                      </button>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">জন্ম তারিখ</label>

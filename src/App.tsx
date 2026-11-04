@@ -801,22 +801,22 @@ export default function App() {
           </div>
         </div>
 
-        {/* 2B. Desktop View (>= md / >= 768px): Full Spacious Layout */}
-        <div className="hidden md:flex max-w-7xl mx-auto px-4 min-h-[5.5rem] py-3 items-center justify-between gap-6">
+        {/* 2B. Desktop View (>= md / >= 768px): Full Spacious Layout with strict alignment */}
+        <div className="hidden md:flex max-w-7xl mx-auto px-4 min-h-[5.25rem] py-2.5 items-center justify-between gap-4">
           <div
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-4 cursor-pointer shrink-0 group"
+            className="flex items-center gap-3.5 cursor-pointer shrink-0 group"
           >
             <div className="flex items-center shrink-0">
-              <SchoolLogo size={58} className="shadow-md group-hover:scale-105 transition-transform" />
+              <SchoolLogo size={52} className="shadow-md group-hover:scale-105 transition-transform" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                <span className="text-xl sm:text-2xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight text-white leading-tight">
                   {language === 'bn' ? 'নাপোড়া শেখেরখীল উচ্চ বিদ্যালয়' : 'Napora Shekherkhil High School'}
                 </span>
               </div>
-              <div className="text-xs text-slate-200 mt-1 flex items-center gap-2">
+              <div className="text-xs text-slate-200 mt-0.5 flex items-center gap-2">
                 <span>{language === 'bn' ? 'ডাক: নাপোড়া, বাঁশখালী, চট্টগ্রাম' : 'Napora, Banshkhali, Chattogram'}</span>
                 <span aria-hidden="true" className="text-slate-400">·</span>
                 <span className="text-amber-200 font-medium">
@@ -826,19 +826,25 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {currentAdmin ? (
-              <div className="flex items-center gap-2">
-                {/* 1. Admin Badge (Height 40px / h-10) */}
-                <div className="h-10 flex items-center gap-2 bg-[#061d36] border border-amber-400/50 px-3 rounded-xl text-xs shadow-xs">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* 1. Admin Badge */}
+                <div className="h-9.5 flex items-center gap-2 bg-[#061d36] border border-amber-400/50 px-2.5 rounded-xl text-xs shadow-xs">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                  <div className="text-left hidden lg:block leading-tight">
+                  <div className="text-left hidden xl:block leading-tight">
                     <div className="text-[10px] text-amber-300 font-bold flex items-center gap-1">
                       <span>অথরাইজড এডমিন</span>
                       <span className="text-[9px] bg-amber-400/20 text-amber-200 px-1 py-0.5 rounded font-medium">{currentAdmin.roleName}</span>
                     </div>
-                    <div className="text-white font-semibold text-xs truncate max-w-[125px]">
+                    <div className="text-white font-semibold text-xs truncate max-w-[120px]">
                       {currentAdmin.name}
+                    </div>
+                  </div>
+                  <div className="text-left xl:hidden leading-tight">
+                    <div className="text-[9px] text-amber-300 font-bold">এডমিন</div>
+                    <div className="text-white font-semibold text-[11px] truncate max-w-[80px]">
+                      {currentAdmin.name.split(' ')[0]}
                     </div>
                   </div>
                   <button
@@ -851,11 +857,11 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* 2. Office Desk Button (Directly next to Admin - Never overflows to the right) */}
+                {/* 2. Office Desk Button */}
                 <button
                   type="button"
                   onClick={() => setActiveTab('office')}
-                  className={`h-10 px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+                  className={`h-9.5 px-3 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
                     activeTab === 'office'
                       ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm ring-2 ring-amber-300/40'
                       : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
@@ -866,49 +872,48 @@ export default function App() {
                   <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office Desk'}</span>
                 </button>
 
-                {/* 3. Users & Security Button (Height 40px / h-10) */}
+                {/* 3. Users & Security Button */}
                 <button
                   type="button"
                   onClick={() => setShowAdminUsersModal(true)}
-                  className="h-10 px-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                  className="h-9.5 px-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                   title="এডমিন একাউন্ট যোগ, এডিট, ডিলিট ও পাসওয়ার্ড পরিবর্তন"
                 >
                   <Users className="w-4 h-4 text-slate-950 shrink-0" />
-                  <span className="hidden sm:inline">ইউজার ও সিকিউরিটি</span>
+                  <span><span className="hidden xl:inline">ইউজার ও </span>সিকিউরিটি</span>
                 </button>
 
-                {/* 4. Apply Now / ভর্তি আবেদন Button (Height 40px / h-10) */}
+                {/* 4. Apply Now / ভর্তি আবেদন Button */}
                 <button
                   type="button"
                   onClick={() => setShowAdmissionModal(true)}
-                  className="h-10 px-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
+                  className="h-9.5 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
                   title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
                 >
                   <UserPlus className="w-4 h-4 text-white shrink-0" />
                   <span>{language === 'bn' ? 'ভর্তি আবেদন' : 'Apply Now'}</span>
                 </button>
 
-                {/* 5. Public View Button (Height 40px / h-10) */}
+                {/* 5. Public View Button */}
                 <button
                   type="button"
                   onClick={handleAdminLogout}
-                  className="h-10 px-3 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-rose-400/50 shrink-0 cursor-pointer"
+                  className="h-9.5 px-3 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-rose-400/50 shrink-0 cursor-pointer"
                   title="এডমিন মোড বন্ধ করে সাধারণ দর্শক বা ভিজিটর হিসেবে ওয়েবসাইট দেখতে এখানে ক্লিক করুন"
                 >
                   <Eye className="w-4 h-4 shrink-0" />
                   <span>পাবলিক ভিউ</span>
-                  <LogOut className="w-3.5 h-3.5 text-rose-200 shrink-0" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                {/* Public Mode Badge (Height 40px / h-10) */}
-                <div className="h-10 flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 px-3 rounded-xl text-xs font-medium shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Public Mode Badge */}
+                <div className="h-9.5 flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 px-3 rounded-xl text-xs font-medium shrink-0">
                   <Eye className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>পাবলিক মোড</span>
                 </div>
 
-                {/* Admin Login Button (Height 40px / h-10) */}
+                {/* Admin Login Button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -916,17 +921,17 @@ export default function App() {
                     setLoginError('');
                     setShowAdminLoginModal(true);
                   }}
-                  className="h-10 px-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                  className="h-9.5 px-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <Lock className="w-4 h-4 text-slate-950 shrink-0" />
                   <span>{language === 'bn' ? 'এডমিন লগইন' : 'Admin Login'}</span>
                 </button>
 
-                {/* Office Desk Button in Public Mode (Height 40px / h-10) */}
+                {/* Office Desk Button in Public Mode */}
                 <button
                   type="button"
                   onClick={() => setActiveTab('office')}
-                  className={`h-10 px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+                  className={`h-9.5 px-3.5 border rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
                     activeTab === 'office'
                       ? 'bg-amber-400 text-slate-950 border-amber-300 font-extrabold shadow-sm ring-2 ring-amber-300/40'
                       : 'bg-[#144275] hover:bg-[#1d5796] border-blue-400/40 text-amber-200 hover:text-white'
@@ -937,11 +942,11 @@ export default function App() {
                   <span>{language === 'bn' ? 'অফিস ডেস্ক' : 'Office Desk'}</span>
                 </button>
 
-                {/* Apply Now Button in Public Mode (Height 40px / h-10) */}
+                {/* Apply Now Button in Public Mode */}
                 <button
                   type="button"
                   onClick={() => setShowAdmissionModal(true)}
-                  className="h-10 px-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
+                  className="h-9.5 px-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 border border-emerald-400/50 cursor-pointer active:scale-95 shrink-0"
                   title="নতুন শিক্ষার্থী অনলাইন ভর্তি আবেদন"
                 >
                   <UserPlus className="w-4 h-4 text-white shrink-0" />
@@ -1318,7 +1323,7 @@ export default function App() {
           ref={navContainerRef}
           className="bg-[#092b50] border-t border-[#134377] w-full relative z-30 shadow-inner"
         >
-          <div className="max-w-7xl mx-auto px-1 sm:px-2 py-1.5 w-full flex items-center gap-1 relative">
+          <div className="max-w-7xl mx-auto px-4 py-1.5 w-full flex items-center gap-1.5 relative">
             
             {/* Left Scroll Button (For narrower screens) */}
             <button
@@ -3232,9 +3237,10 @@ export default function App() {
       <OnlineAdmissionModal
         isOpen={showAdmissionModal}
         onClose={() => setShowAdmissionModal(false)}
+        students={students}
         existingCount={students.length}
         onAddStudent={(newStudent) => {
-          const updated = [...students, newStudent];
+          const updated = sortStudentsBySerial([...students, newStudent]);
           setStudents(updated);
           localStorage.setItem('school_students', JSON.stringify(updated));
         }}
