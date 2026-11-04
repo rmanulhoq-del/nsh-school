@@ -13,7 +13,7 @@ import {
   Users,
   Download
 } from 'lucide-react';
-import { Student, ExamType, StudentGroup, formatClassBangla } from '../types';
+import { Student, ExamType, StudentGroup, formatClassBangla, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
 import {
   getSubjectConfigsForClass,
@@ -37,19 +37,21 @@ export default function ClassTabulationSheetModal({
 }: ClassTabulationSheetModalProps) {
   const [selectedClass, setSelectedClass] = useState<string>('6');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedExam, setSelectedExam] = useState<ExamType>('১ম সাময়িক');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const isNineOrTen = selectedClass === '9' || selectedClass === '10';
 
-  // Filter students for the selected class, section, and group
+  // Filter students for the selected class, section, gender, and group
   const filteredStudents = useMemo(() => {
-    return students
-      .filter(s => {
+    return sortStudentsBySerial(
+      students.filter(s => {
         if (s.tcIssued) return false;
         if (s.className !== selectedClass) return false;
         if (selectedSection !== 'all' && s.section !== selectedSection) return false;
+        if (selectedGender !== 'all' && s.gender !== selectedGender) return false;
         if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
@@ -61,8 +63,8 @@ export default function ClassTabulationSheetModal({
         }
         return true;
       })
-      .sort((a, b) => a.roll - b.roll);
-  }, [students, selectedClass, selectedSection, selectedGroup, isNineOrTen, searchQuery]);
+    );
+  }, [students, selectedClass, selectedSection, selectedGender, selectedGroup, isNineOrTen, searchQuery]);
 
   // Compile exam results for each student
   const studentResults = useMemo(() => {
@@ -221,6 +223,29 @@ export default function ClassTabulationSheetModal({
               ))}
             </div>
 
+            {/* Gender Selector */}
+            <div className="flex items-center gap-1 bg-[#061d36] p-1 rounded-xl border border-white/15">
+              <span className="text-[10px] text-slate-400 px-2">শাখা রূপ:</span>
+              {[
+                { id: 'all', label: 'উভয় (সকল)' },
+                { id: 'male', label: '👦 ছাত্র (Boys)' },
+                { id: 'female', label: '👧 ছাত্রী (Girls)' }
+              ].map(g => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setSelectedGender(g.id as any)}
+                  className={`px-2 py-1 rounded-lg font-medium transition-all ${
+                    selectedGender === g.id
+                      ? 'bg-purple-700 text-white font-bold'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+
             {/* Group Selector for 9 & 10 */}
             {isNineOrTen && (
               <div className="flex items-center gap-1 bg-[#061d36] p-1 rounded-xl border border-white/15">
@@ -258,6 +283,7 @@ export default function ClassTabulationSheetModal({
                 <option value="১ম সাময়িক" className="bg-[#0c3664] text-white">১ম সাময়িক</option>
                 <option value="২য় সাময়িক" className="bg-[#0c3664] text-white">২য় সাময়িক</option>
                 <option value="বার্ষিক" className="bg-[#0c3664] text-white">বার্ষিক পরীক্ষা</option>
+                <option value="টেস্ট পরীক্ষা" className="bg-[#0c3664] text-white">টেস্ট পরীক্ষা (SSC Test)</option>
               </select>
             </div>
 

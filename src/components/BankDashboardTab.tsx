@@ -14,7 +14,7 @@ import {
   Calendar
 } from 'lucide-react';
 import SchoolLogo from './SchoolLogo';
-import { Student, NavTab, Transaction, formatClassOrdinal } from '../types';
+import { Student, NavTab, Transaction, formatClassOrdinal, sortStudentsBySerial } from '../types';
 import SchoolAccountsLedgerView from './SchoolAccountsLedgerView';
 import { INITIAL_TRANSACTIONS } from '../data/initialData';
 
@@ -79,7 +79,7 @@ export default function BankDashboardTab({
   };
 
   const filteredStudents = useMemo(() => {
-    return students.filter(student => {
+    const list = students.filter(student => {
       if (selectedClass !== 'all' && student.className !== selectedClass) return false;
       if (selectedSection !== 'all' && student.section !== selectedSection) return false;
       if (selectedStatus !== 'all' && student.status !== selectedStatus) return false;
@@ -94,6 +94,8 @@ export default function BankDashboardTab({
       }
       return true;
     });
+
+    return sortStudentsBySerial(list);
   }, [students, selectedClass, selectedSection, selectedStatus, selectedBank, searchQuery]);
 
   return (

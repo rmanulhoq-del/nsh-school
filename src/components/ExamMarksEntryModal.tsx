@@ -14,7 +14,7 @@ import {
   RotateCcw,
   Sparkles
 } from 'lucide-react';
-import { Student, ExamType, StudentGender, StudentGroup, formatClassBangla, formatGroupBangla } from '../types';
+import { Student, ExamType, StudentGender, StudentGroup, formatClassBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
 import {
   getSubjectConfigsForClass,
@@ -43,6 +43,7 @@ export default function ExamMarksEntryModal({
 }: ExamMarksEntryModalProps) {
   const [selectedClass, setSelectedClass] = useState<'6' | '7' | '8' | '9' | '10'>('6');
   const [selectedSection, setSelectedSection] = useState<'A' | 'B' | 'C' | 'D'>('A');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedExam, setSelectedExam] = useState<ExamType>('১ম সাময়িক');
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
@@ -58,17 +59,18 @@ export default function ExamMarksEntryModal({
   // Input states for bulk subject mode (studentId -> MarkInput)
   const [bulkMarksMap, setBulkMarksMap] = useState<Record<string, MarkInput>>({});
 
-  // Filter students in current class & section & group
+  // Filter students in current class & section & gender & group
   const classStudents = useMemo(() => {
-    return students
-      .filter(s => {
+    return sortStudentsBySerial(
+      students.filter(s => {
         if (s.tcIssued) return false;
         if (s.className !== selectedClass || s.section !== selectedSection) return false;
+        if (selectedGender !== 'all' && s.gender !== selectedGender) return false;
         if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
         return true;
       })
-      .sort((a, b) => a.roll - b.roll);
-  }, [students, selectedClass, selectedSection, selectedGroup, isNineOrTen]);
+    );
+  }, [students, selectedClass, selectedSection, selectedGender, selectedGroup, isNineOrTen]);
 
   // Handle pre-selected student or default to first student in class
   useEffect(() => {
@@ -375,6 +377,31 @@ export default function ExamMarksEntryModal({
                 ))}
               </div>
 
+              <span className="font-bold text-slate-700 ml-2">শাখা রূপ:</span>
+              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-300">
+                {[
+                  { id: 'all', label: 'উভয়' },
+                  { id: 'male', label: '👦 ছাত্র' },
+                  { id: 'female', label: '👧 ছাত্রী' }
+                ].map(g => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedGender(g.id as any);
+                      setSaveSuccessMsg(null);
+                    }}
+                    className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                      selectedGender === g.id
+                        ? 'bg-purple-700 text-white shadow-xs'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+
               {isNineOrTen && (
                 <>
                   <span className="font-bold text-slate-700 ml-2 flex items-center gap-1">
@@ -423,6 +450,7 @@ export default function ExamMarksEntryModal({
                 <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
                 <option value="২য় সাময়িক">২য় সাময়িক পরীক্ষা</option>
                 <option value="বার্ষিক">বার্ষিক পরীক্ষা</option>
+                <option value="টেস্ট পরীক্ষা">টেস্ট পরীক্ষা (SSC Test Exam)</option>
               </select>
             </div>
           </div>

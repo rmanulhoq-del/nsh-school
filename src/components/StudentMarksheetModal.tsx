@@ -15,7 +15,7 @@ import {
   Calendar,
   FileCheck2
 } from 'lucide-react';
-import { Student, ExamType, formatClassBangla, formatGroupBangla } from '../types';
+import { Student, ExamType, formatClassBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
 import {
   getSubjectConfigsForClass,
@@ -46,11 +46,11 @@ export default function StudentMarksheetModal({
   const [isEditingMarks, setIsEditingMarks] = useState<boolean>(false);
   const [editableMarks, setEditableMarks] = useState<Record<string, MarkInput>>({});
 
-  // Filter students in the same class and sort by roll
+  // Filter students in the same class and sort by serial (class -> section -> gender -> roll)
   const classStudents = useMemo(() => {
-    return allStudents
-      .filter(s => s.className === student.className && !s.tcIssued)
-      .sort((a, b) => a.roll - b.roll);
+    return sortStudentsBySerial(
+      allStudents.filter(s => s.className === student.className && !s.tcIssued)
+    );
   }, [allStudents, student.className]);
 
   const currentIndex = classStudents.findIndex(s => s.id === student.id);
@@ -148,6 +148,7 @@ export default function StudentMarksheetModal({
               <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
               <option value="২য় সাময়িক">২য় সাময়িক পরীক্ষা</option>
               <option value="বার্ষিক">বার্ষিক পরীক্ষা</option>
+              <option value="টেস্ট পরীক্ষা">টেস্ট পরীক্ষা (SSC Test Exam)</option>
             </select>
 
             {/* Prev / Next Student */}

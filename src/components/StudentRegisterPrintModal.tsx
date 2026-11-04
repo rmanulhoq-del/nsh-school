@@ -9,7 +9,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import SchoolLogo from './SchoolLogo';
-import { Student, formatClassBangla, formatGroupBangla } from '../types';
+import { Student, formatClassBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 
 interface StudentRegisterPrintModalProps {
   students: Student[];
@@ -49,7 +49,7 @@ export default function StudentRegisterPrintModal({
     window.print();
   };
 
-  const activeStudents = students.filter(s => !s.tcIssued);
+  const activeStudents = sortStudentsBySerial(students.filter(s => !s.tcIssued));
   const maleCount = activeStudents.filter(s => s.gender === 'male' || !s.gender).length;
   const femaleCount = activeStudents.filter(s => s.gender === 'female').length;
   const paidCount = activeStudents.filter(s => s.status === 'paid').length;

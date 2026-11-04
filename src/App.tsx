@@ -88,7 +88,8 @@ import {
   HeadmasterData,
   DEFAULT_HEADMASTER_DATA,
   PresidentData,
-  DEFAULT_PRESIDENT_DATA
+  DEFAULT_PRESIDENT_DATA,
+  sortStudentsBySerial
 } from './types';
 import {
   AUTHORIZED_STAFF,
@@ -286,16 +287,17 @@ export default function App() {
   // Data State
   const [students, setStudents] = useState<Student[]>(() => {
     const saved = localStorage.getItem('school_students');
-    if (!saved) return INITIAL_STUDENTS;
+    if (!saved) return sortStudentsBySerial(INITIAL_STUDENTS);
     try {
       const parsed: Student[] = JSON.parse(saved);
-      // Ensure all 126 students from the register (Class 10 Section C Humanities) are present
-      const non10C = parsed.filter(s => !(s.className === '10' && s.section === 'C'));
-      const merged = [...non10C, ...CLASS_10_HUMANITIES_STUDENTS];
+      // 100% Data Preservation: Keep all existing user-saved students intact!
+      const existingIds = new Set(parsed.map(s => s.id));
+      const missing = CLASS_10_HUMANITIES_STUDENTS.filter(s => !existingIds.has(s.id));
+      const merged = sortStudentsBySerial([...parsed, ...missing]);
       localStorage.setItem('school_students', JSON.stringify(merged));
       return merged;
     } catch {
-      return INITIAL_STUDENTS;
+      return sortStudentsBySerial(INITIAL_STUDENTS);
     }
   });
 

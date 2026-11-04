@@ -36,7 +36,8 @@ import {
   formatClassOrdinal,
   formatClassBangla,
   formatGroupBangla,
-  formatSectionBangla
+  formatSectionBangla,
+  sortStudentsBySerial
 } from '../types';
 import { StudentDataForDispatch } from './GuardianDispatchModal';
 import StudentMarksheetModal from './StudentMarksheetModal';
@@ -71,6 +72,7 @@ export default function StudentsTab({
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'active' | 'tc_archive'>('active');
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
@@ -156,10 +158,10 @@ export default function StudentsTab({
   const [tcDate, setTcDate] = useState(new Date().toISOString().split('T')[0]);
   const [tcActionType, setTcActionType] = useState<'tc_archive' | 'permanent_delete'>('tc_archive');
 
-  // Helper to calculate the next available roll number in a specific class and section
-  const getNextAvailableRoll = (cls: string, sec: string) => {
+  // Helper to calculate the next available roll number in a specific class, section and gender (Boys and Girls separate roll 1)
+  const getNextAvailableRoll = (cls: string, sec: string, gender: StudentGender = 'male') => {
     const existingRolls = students
-      .filter(s => s.className === cls && s.section === sec && !s.tcIssued)
+      .filter(s => s.className === cls && s.section === sec && s.gender === gender && !s.tcIssued)
       .map(s => s.roll);
     if (existingRolls.length === 0) return 1;
     let next = 1;
@@ -169,21 +171,23 @@ export default function StudentsTab({
     return next;
   };
 
-  // Check if current input roll in Add Modal already belongs to another student
+  // Check if current input roll in Add Modal already belongs to another student of the same gender in that class & section
   const existingStudentWithRoll = useMemo(() => {
     if (newStudentRoll === '' || !newStudentRoll) return null;
     return students.find(
-      s => s.className === newStudentClass && s.section === newStudentSection && s.roll === Number(newStudentRoll) && !s.tcIssued
+      s => s.className === newStudentClass && s.section === newStudentSection && s.gender === newStudentGender && s.roll === Number(newStudentRoll) && !s.tcIssued
     );
-  }, [students, newStudentClass, newStudentSection, newStudentRoll]);
+  }, [students, newStudentClass, newStudentSection, newStudentGender, newStudentRoll]);
 
   // Open Add Student Modal initialized with next available roll
   const handleOpenAddModal = () => {
     const targetClass = (selectedClass !== 'all' ? selectedClass : '6') as '6' | '7' | '8' | '9' | '10';
     const targetSec = (selectedSection !== 'all' ? selectedSection : 'A') as 'A' | 'B' | 'C' | 'D';
+    const targetGender: StudentGender = selectedGender !== 'all' ? selectedGender : 'male';
+    setNewStudentGender(targetGender);
     setNewStudentClass(targetClass);
     setNewStudentSection(targetSec);
-    setNewStudentRoll(getNextAvailableRoll(targetClass, targetSec));
+    setNewStudentRoll(getNextAvailableRoll(targetClass, targetSec, targetGender));
     setNewStudentName('');
     setNewStudentGuardian('');
     setNewStudentPhone('');
@@ -218,9 +222,10 @@ export default function StudentsTab({
   const currentList = viewMode === 'active' ? students : tcArchive;
 
   const filteredStudents = useMemo(() => {
-    return currentList.filter(student => {
+    const list = currentList.filter(student => {
       if (selectedClass !== 'all' && student.className !== selectedClass) return false;
       if (selectedSection !== 'all' && student.section !== selectedSection) return false;
+      if (selectedGender !== 'all' && student.gender !== selectedGender) return false;
       if (selectedGroup !== 'all') {
         if (student.className === '9' || student.className === '10') {
           if (student.group !== selectedGroup) return false;
@@ -239,7 +244,9 @@ export default function StudentsTab({
       }
       return true;
     });
-  }, [currentList, selectedClass, selectedSection, selectedGroup, searchQuery]);
+
+    return sortStudentsBySerial(list);
+  }, [currentList, selectedClass, selectedSection, selectedGender, selectedGroup, searchQuery]);
 
   // Handle Add Student
   const handleAddStudentSubmit = (e?: React.FormEvent) => {
@@ -258,18 +265,20 @@ export default function StudentsTab({
 
     const rollNum = Number(newStudentRoll);
     const existing = students.find(
-      s => s.className === newStudentClass && s.section === newStudentSection && s.roll === rollNum && !s.tcIssued
+      s => s.className === newStudentClass && s.section === newStudentSection && s.gender === newStudentGender && s.roll === rollNum && !s.tcIssued
     );
 
     if (existing) {
-      const nextRoll = getNextAvailableRoll(newStudentClass, newStudentSection);
+      const nextRoll = getNextAvailableRoll(newStudentClass, newStudentSection, newStudentGender);
+      const genderLabel = newStudentGender === 'female' ? 'ছাত্রী' : 'ছাত্র';
       setAddModalError(
-        `সতর্কতা: ${formatClassBangla(newStudentClass)}, শাখা ${newStudentSection}-এ রোল #${rollNum} ইতিমধ্যে "${existing.name}"-এর নামে নিবন্ধিত রয়েছে! অনুগ্রহ করে অন্য রোল দিন অথবা নিচের বাটনে ক্লিক করে পরবর্তী খালি রোল (${nextRoll}) ব্যবহার করুন।`
+        `সতর্কতা: ${formatClassBangla(newStudentClass)}, শাখা ${newStudentSection} (${genderLabel})-এ রোল #${rollNum} ইতিমধ্যে "${existing.name}"-এর নামে নিবন্ধিত রয়েছে! অনুগ্রহ করে অন্য রোল দিন অথবা নিচের বাটনে ক্লিক করে পরবর্তী খালি রোল (${nextRoll}) ব্যবহার করুন।`
       );
       return;
     }
 
-    const generatedId = `STU-${newStudentClass}${newStudentSection}-${String(rollNum).padStart(3, '0')}`;
+    const gCode = newStudentGender === 'female' ? 'G' : 'B';
+    const generatedId = `STU-${newStudentClass}${newStudentSection}-${gCode}${String(rollNum).padStart(3, '0')}`;
     const newStudent: Student = {
       id: generatedId,
       name: newStudentName.trim(),
@@ -300,7 +309,7 @@ export default function StudentsTab({
       paymentDate: newStudentStatus === 'paid' ? new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : undefined
     };
 
-    const updated = [newStudent, ...students];
+    const updated = sortStudentsBySerial([...students, newStudent]);
     setStudents(updated);
     try {
       localStorage.setItem('school_students', JSON.stringify(updated));
@@ -388,9 +397,10 @@ export default function StudentsTab({
       return s;
     });
 
-    setStudents(updated);
+    const sorted = sortStudentsBySerial(updated);
+    setStudents(sorted);
     try {
-      localStorage.setItem('school_students', JSON.stringify(updated));
+      localStorage.setItem('school_students', JSON.stringify(sorted));
     } catch {}
 
     setShowEditModal(false);
@@ -460,7 +470,7 @@ export default function StudentsTab({
         tcReason: undefined
       };
 
-      const updatedActive = [restoredStudent, ...students];
+      const updatedActive = sortStudentsBySerial([restoredStudent, ...students]);
       const updatedArchive = tcArchive.filter(s => s.id !== student.id);
 
       setStudents(updatedActive);
@@ -627,7 +637,7 @@ export default function StudentsTab({
 
         {/* Filter Console: Class, Section, Group Dropdowns & Search */}
         <div className="pt-4 border-t border-slate-100 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
             {/* Dropdown 1: শ্রেণি নির্বাচন (Class Selector) */}
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center gap-1.5">
@@ -667,7 +677,24 @@ export default function StudentsTab({
               </select>
             </div>
 
-            {/* Dropdown 3: বিভাগ নির্বাচন (Group / Department for Class 9 & 10) */}
+            {/* Dropdown 3: ছাত্র / ছাত্রী শাখা (Gender Selector) */}
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                <span>ছাত্র / ছাত্রী শাখা:</span>
+              </label>
+              <select
+                value={selectedGender}
+                onChange={(e) => setSelectedGender(e.target.value as any)}
+                className="w-full px-3 py-2 bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl text-slate-900 font-bold focus:outline-none focus:border-purple-600"
+              >
+                <option value="all">উভয় (সকল ছাত্র-ছাত্রী)</option>
+                <option value="male">👦 ছাত্র শাখা (Boys)</option>
+                <option value="female">👧 ছাত্রী শাখা (Girls)</option>
+              </select>
+            </div>
+
+            {/* Dropdown 4: বিভাগ নির্বাচন (Group / Department for Class 9 & 10) */}
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
@@ -757,14 +784,37 @@ export default function StudentsTab({
                   {sec === 'all' ? 'সকল শাখা' : `শাখা '${sec === 'A' ? 'এ' : sec === 'B' ? 'বি' : sec === 'C' ? 'সি' : 'ডি'}' (${sec})`}
                 </button>
               ))}
+
+              <span className="text-slate-300 mx-1">|</span>
+
+              <span className="text-slate-500 font-semibold mr-1">শাখা রূপ:</span>
+              {[
+                { id: 'all', label: 'উভয়' },
+                { id: 'male', label: '👦 ছাত্র (Boys)' },
+                { id: 'female', label: '👧 ছাত্রী (Girls)' }
+              ].map(g => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setSelectedGender(g.id as any)}
+                  className={`px-2 py-1 rounded-lg font-bold transition-all text-[11px] ${
+                    selectedGender === g.id
+                      ? 'bg-purple-700 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
             </div>
 
-            {(selectedClass !== 'all' || selectedSection !== 'all' || selectedGroup !== 'all' || searchQuery) && (
+            {(selectedClass !== 'all' || selectedSection !== 'all' || selectedGender !== 'all' || selectedGroup !== 'all' || searchQuery) && (
               <button
                 type="button"
                 onClick={() => {
                   setSelectedClass('all');
                   setSelectedSection('all');
+                  setSelectedGender('all');
                   setSelectedGroup('all');
                   setSearchQuery('');
                 }}
@@ -793,6 +843,11 @@ export default function StudentsTab({
             {selectedSection !== 'all' && (
               <span className="text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-md text-emerald-300">
                 শাখা- '{selectedSection}'
+              </span>
+            )}
+            {selectedGender !== 'all' && (
+              <span className="text-xs font-bold bg-purple-500/40 border border-purple-300/40 px-2.5 py-0.5 rounded-md text-pink-200">
+                {selectedGender === 'male' ? '👦 ছাত্র শাখা (Boys)' : '👧 ছাত্রী শাখা (Girls)'}
               </span>
             )}
             {selectedGroup !== 'all' && (

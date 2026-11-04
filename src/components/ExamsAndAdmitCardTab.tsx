@@ -22,11 +22,12 @@ import {
   RotateCcw,
   AlertCircle
 } from 'lucide-react';
-import { Student, ExamType, formatClassBangla, formatSectionBangla, formatGroupBangla } from '../types';
+import { Student, ExamType, ExamRoutineItem, DEFAULT_EXAM_ROUTINE, formatClassBangla, formatSectionBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
 import StudentMarksheetModal from './StudentMarksheetModal';
 import ClassTabulationSheetModal from './ClassTabulationSheetModal';
 import ExamMarksEntryModal from './ExamMarksEntryModal';
+import ExamRoutineEditModal from './ExamRoutineEditModal';
 import { generateSampleMarksForStudent, evaluateStudentMarks, getSubjectConfigsForClass } from '../data/examRules';
 
 interface ExamsAndAdmitCardTabProps {
@@ -45,6 +46,7 @@ export default function ExamsAndAdmitCardTab({
   const [activeSubTab, setActiveSubTab] = useState<'result' | 'tabulation' | 'marks_entry' | 'admit' | 'seatplan'>('result');
   const [selectedClass, setSelectedClass] = useState<string>('6');
   const [selectedSection, setSelectedSection] = useState<string>('A');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedExam, setSelectedExam] = useState<ExamType>('১ম সাময়িক');
   const [examYear, setExamYear] = useState<string>('২০২৬');
@@ -54,7 +56,17 @@ export default function ExamsAndAdmitCardTab({
   const [showMarksEntryModal, setShowMarksEntryModal] = useState<boolean>(false);
   const [showTabulationModal, setShowTabulationModal] = useState<boolean>(false);
   const [showMarksheetModal, setShowMarksheetModal] = useState<boolean>(false);
+  const [showRoutineEditModal, setShowRoutineEditModal] = useState<boolean>(false);
   const [selectedStudentForMarksheet, setSelectedStudentForMarksheet] = useState<Student | null>(null);
+
+  // Exam Routine Schedule for Admit Card (Loaded from localStorage or default)
+  const [examRoutine, setExamRoutine] = useState<ExamRoutineItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('school_exam_routine');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [...DEFAULT_EXAM_ROUTINE];
+  });
 
   // Student Passcode Result Search State
   const [passcodeClass, setPasscodeClass] = useState<string>('6');
@@ -89,25 +101,14 @@ export default function ExamsAndAdmitCardTab({
     { roomNo: '৩০১', building: 'মুহাম্মদ আলী মেমোরিয়াল ভবন (তেতলা)', capacity: 45, classes: 'সকল শ্রেণির অবশিষ্ট শিক্ষার্থী' }
   ]);
 
-  // Exam Routine Schedule for Admit Card
-  const examRoutine = [
-    { date: '২৫/১০/২০২৬', day: 'রবিবার', subject: 'বাংলা ১ম পত্র', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '২৭/১০/২০২৬', day: 'মঙ্গলবার', subject: 'বাংলা ২য় পত্র', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '২৯/১০/২০২৬', day: 'বৃহস্পতিবার', subject: 'ইংরেজি ১ম পত্র', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '০১/১১/২০২৬', day: 'রবিবার', subject: 'ইংরেজি ২য় পত্র', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '০৩/১১/২০২৬', day: 'মঙ্গলবার', subject: 'গণিত (আবশ্যিক)', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '০৫/১১/২০২৬', day: 'বৃহস্পতিবার', subject: 'সাধারণ বিজ্ঞান / পদার্থবিজ্ঞান', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '০৮/১১/২০২৬', day: 'রবিবার', subject: 'ইসলাম ও নৈতিক শিক্ষা / হিন্দুধর্ম', time: 'সকাল ১০:০০ - দুপুর ০১:০০' },
-    { date: '১০/১১/২০২৬', day: 'মঙ্গলবার', subject: 'তথ্য ও যোগাযোগ প্রযুক্তি (ICT)', time: 'সকাল ১০:০০ - দুপুর ১২:৩০' }
-  ];
-
   const isNineOrTenSelected = selectedClass === '9' || selectedClass === '10';
 
   const filteredStudents = useMemo(() => {
-    return students
+    const list = students
       .filter(s => {
         if (s.className !== selectedClass) return false;
         if (selectedSection !== 'all' && s.section !== selectedSection) return false;
+        if (selectedGender !== 'all' && s.gender !== selectedGender) return false;
         if (isNineOrTenSelected && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
         if (!searchStudent.trim()) return true;
         const q = searchStudent.toLowerCase();
@@ -116,9 +117,10 @@ export default function ExamsAndAdmitCardTab({
           s.roll.toString().includes(q) ||
           s.id.toLowerCase().includes(q)
         );
-      })
-      .sort((a, b) => a.roll - b.roll);
-  }, [students, selectedClass, selectedSection, selectedGroup, isNineOrTenSelected, searchStudent]);
+      });
+
+    return sortStudentsBySerial(list);
+  }, [students, selectedClass, selectedSection, selectedGender, selectedGroup, isNineOrTenSelected, searchStudent]);
 
   const currentStudent = students.find(s => s.id === activeStudentId) || filteredStudents[0] || students[0];
 
@@ -827,6 +829,7 @@ export default function ExamsAndAdmitCardTab({
                 <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
                 <option value="২য় সাময়িক">২য় সাময়িক পরীক্ষা</option>
                 <option value="বার্ষিক">বার্ষিক পরীক্ষা</option>
+                <option value="টেস্ট পরীক্ষা">টেস্ট পরীক্ষা (SSC Test Exam)</option>
               </select>
 
               <select
@@ -1040,8 +1043,8 @@ export default function ExamsAndAdmitCardTab({
       {activeSubTab === 'admit' && currentStudent && (
         <div className="space-y-6">
           {/* Filter Bar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isNineOrTenSelected ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${isNineOrTenSelected ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3`}>
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">পরীক্ষার নাম</label>
                 <select
@@ -1052,6 +1055,7 @@ export default function ExamsAndAdmitCardTab({
                   <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
                   <option value="২য় সাময়িক">২য় সাময়িক পরীক্ষা</option>
                   <option value="বার্ষিক">বার্ষিক পরীক্ষা</option>
+                  <option value="টেস্ট পরীক্ষা">টেস্ট পরীক্ষা (SSC Test Exam)</option>
                 </select>
               </div>
 
@@ -1084,10 +1088,23 @@ export default function ExamsAndAdmitCardTab({
                 </select>
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">ছাত্র / ছাত্রী শাখা</label>
+                <select
+                  value={selectedGender}
+                  onChange={e => setSelectedGender(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
+                >
+                  <option value="all">উভয় (সকল ছাত্র-ছাত্রী)</option>
+                  <option value="male">👦 ছাত্র শাখা (Boys)</option>
+                  <option value="female">👧 ছাত্রী শাখা (Girls)</option>
+                </select>
+              </div>
+
               {isNineOrTenSelected && (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                    <span>বিভাগ নির্বাচন (৯ম ও ১০ম)</span>
+                    <span>বিভাগ (৯ম ও ১০ম)</span>
                     <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">সক্রিয়</span>
                   </label>
                   <select
@@ -1119,23 +1136,80 @@ export default function ExamsAndAdmitCardTab({
             </div>
           </div>
 
+          {/* Admin Routine Action Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-slate-900 to-[#0c3664] p-3.5 rounded-2xl text-white shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 font-bold shrink-0">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>পরীক্ষার রুটিন ও প্রবেশপত্র কন্ট্রোল</span>
+                  <span className="text-[10px] bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-2 py-0.2 rounded-full font-bold">
+                    রুটিন আইটেম: {examRoutine.length} টি
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-300">
+                  রুটিনের তারিখ, সময় ও বিষয় পরিবর্তন করতে পাশের এডমিন বাটনে ক্লিক করুন
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => setShowRoutineEditModal(true)}
+                  className="px-3.5 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                  title="পরীক্ষার সময়সূচি, বিষয়, তারিখ ও বার পরিবর্তন করুন"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-slate-950" />
+                  <span>✏️ পরীক্ষার রুটিন এডিট ও পরিবর্তন (এডমিন)</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onRequireAdminLogin}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-amber-200 border border-white/20 rounded-xl text-xs font-bold flex items-center gap-1.5"
+                  title="রুটিন পরিবর্তনের জন্য এডমিন হিসেবে লগইন করুন"
+                >
+                  <Lock className="w-3.5 h-3.5 text-amber-300" />
+                  <span>রুটিন এডিট (এডমিন লগইন প্রয়োজন)</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-300" />
+                <span>🖨️ প্রবেশপত্র প্রিন্ট</span>
+              </button>
+            </div>
+          </div>
+
           {/* Student Selector Quick Pills */}
           <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-1.5 overflow-x-auto scrollbar-none">
             <span className="text-xs font-bold text-slate-500 shrink-0 mr-1">শিক্ষার্থী:</span>
-            {filteredStudents.map(s => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setActiveStudentId(s.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
-                  activeStudentId === s.id
-                    ? 'bg-[#0c3664] text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                রোল {s.roll}: {s.name}
-              </button>
-            ))}
+            {filteredStudents.length === 0 ? (
+              <span className="text-xs text-slate-400 italic">কোনো শিক্ষার্থী পাওয়া যায়নি</span>
+            ) : (
+              filteredStudents.map(s => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setActiveStudentId(s.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all ${
+                    activeStudentId === s.id
+                      ? 'bg-[#0c3664] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {s.gender === 'female' ? '👧' : '👦'} রোল {s.roll}: {s.name}
+                </button>
+              ))
+            )}
           </div>
 
           {/* Official Admit Card Design (A4 Half Size Printable Layout) */}
@@ -1386,6 +1460,18 @@ export default function ExamsAndAdmitCardTab({
                 return s;
               }));
             }
+          }}
+        />
+      )}
+
+      {/* 4. Admit Card Exam Routine Edit Modal */}
+      {showRoutineEditModal && (
+        <ExamRoutineEditModal
+          isOpen={showRoutineEditModal}
+          onClose={() => setShowRoutineEditModal(false)}
+          routine={examRoutine}
+          onSave={(newRoutine) => {
+            setExamRoutine(newRoutine);
           }}
         />
       )}

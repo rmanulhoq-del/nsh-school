@@ -20,7 +20,7 @@ import {
   X,
   ExternalLink
 } from 'lucide-react';
-import { Student, Teacher, StaffMember } from '../types';
+import { Student, Teacher, StaffMember, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
 
 interface AttendanceHubTabProps {
@@ -46,6 +46,7 @@ export default function AttendanceHubTab({
   });
   const [selectedClass, setSelectedClass] = useState<string>('6');
   const [selectedSection, setSelectedSection] = useState<string>('A');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [studentSearch, setStudentSearch] = useState<string>('');
   const [staffSearch, setStaffSearch] = useState<string>('');
@@ -126,22 +127,24 @@ export default function AttendanceHubTab({
   }, [selectedDate, teachers, staffList]);
 
   // Filter current roster
-  const currentClassStudents = students
-    .filter(s => {
-      if (s.className !== selectedClass || s.section !== selectedSection) return false;
-      if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
-      return true;
-    })
-    .filter(s => {
-      if (!studentSearch.trim()) return true;
-      const q = studentSearch.toLowerCase();
-      return (
-        s.name.toLowerCase().includes(q) ||
-        s.roll.toString().includes(q) ||
-        s.id.toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) => a.roll - b.roll);
+  const currentClassStudents = sortStudentsBySerial(
+    students
+      .filter(s => {
+        if (s.className !== selectedClass || s.section !== selectedSection) return false;
+        if (selectedGender !== 'all' && s.gender !== selectedGender) return false;
+        if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
+        return true;
+      })
+      .filter(s => {
+        if (!studentSearch.trim()) return true;
+        const q = studentSearch.toLowerCase();
+        return (
+          s.name.toLowerCase().includes(q) ||
+          s.roll.toString().includes(q) ||
+          s.id.toLowerCase().includes(q)
+        );
+      })
+  );
 
   // Stats calculation
   const totalRoster = currentClassStudents.length;
@@ -333,7 +336,7 @@ export default function AttendanceHubTab({
         <div className="space-y-5">
           {/* Controls Bar */}
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isNineOrTen ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${isNineOrTen ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3`}>
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">হাজিরার তারিখ</label>
                 <input
@@ -370,6 +373,19 @@ export default function AttendanceHubTab({
                   <option value="B">শাখা: খ (Section B)</option>
                   <option value="C">শাখা: গ (Section C)</option>
                   <option value="D">শাখা: ঘ (Section D)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">ছাত্র / ছাত্রী শাখা</label>
+                <select
+                  value={selectedGender}
+                  onChange={e => setSelectedGender(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#0c3664] focus:outline-hidden"
+                >
+                  <option value="all">উভয় (সকল ছাত্র-ছাত্রী)</option>
+                  <option value="male">👦 ছাত্র শাখা (Boys)</option>
+                  <option value="female">👧 ছাত্রী শাখা (Girls)</option>
                 </select>
               </div>
 
