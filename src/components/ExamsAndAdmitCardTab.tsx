@@ -20,7 +20,9 @@ import {
   Sparkles,
   TrendingUp,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Student, ExamType, ExamRoutineItem, DEFAULT_EXAM_ROUTINE, formatClassBangla, formatSectionBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 import SchoolLogo from './SchoolLogo';
@@ -58,6 +60,12 @@ export default function ExamsAndAdmitCardTab({
   const [showMarksheetModal, setShowMarksheetModal] = useState<boolean>(false);
   const [showRoutineEditModal, setShowRoutineEditModal] = useState<boolean>(false);
   const [selectedStudentForMarksheet, setSelectedStudentForMarksheet] = useState<Student | null>(null);
+
+  // Tabulation Preview Pagination and Filter State
+  const [tabulationPage, setTabulationPage] = useState<number>(1);
+  const [tabulationPageSize, setTabulationPageSize] = useState<number>(10);
+  const [tabulationGender, setTabulationGender] = useState<'all' | 'male' | 'female'>('all');
+  const [tabulationSearch, setTabulationSearch] = useState<string>('');
 
   // Exam Routine Schedule for Admit Card (Loaded from localStorage or default)
   const [examRoutine, setExamRoutine] = useState<ExamRoutineItem[]>(() => {
@@ -186,16 +194,29 @@ export default function ExamsAndAdmitCardTab({
     return generateSampleMarksForStudent(searchResultStudent, passcodeExam);
   }, [searchResultStudent, passcodeExam]);
 
-  // Tabulation sheet stats for preview
-  const tabulationStats = useMemo(() => {
+  // Tabulation student list with filters
+  const tabulationStudents = useMemo(() => {
     const isNineOrTen = selectedClass === '9' || selectedClass === '10';
-    const classStus = students.filter(s => {
+    const list = students.filter(s => {
       if (s.className !== selectedClass) return false;
       if (selectedSection !== 'all' && s.section !== selectedSection) return false;
+      if (tabulationGender !== 'all' && s.gender !== tabulationGender) return false;
       if (isNineOrTen && selectedGroup !== 'all' && s.group !== selectedGroup) return false;
-      return true;
+      if (!tabulationSearch.trim()) return true;
+      const q = tabulationSearch.toLowerCase();
+      return (
+        s.name.toLowerCase().includes(q) ||
+        s.roll.toString().includes(q) ||
+        s.id.toLowerCase().includes(q)
+      );
     });
-    const records = classStus.map(s => {
+
+    return sortStudentsBySerial(list);
+  }, [students, selectedClass, selectedSection, tabulationGender, selectedGroup, tabulationSearch]);
+
+  // Tabulation sheet stats for preview
+  const tabulationStats = useMemo(() => {
+    const records = tabulationStudents.map(s => {
       if (s.examRecords && s.examRecords[selectedExam]) return s.examRecords[selectedExam];
       return generateSampleMarksForStudent(s, selectedExam);
     });
@@ -206,7 +227,17 @@ export default function ExamsAndAdmitCardTab({
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : '০';
 
     return { total, passed, failed, aPlus, passRate };
-  }, [students, selectedClass, selectedSection, selectedGroup, selectedExam]);
+  }, [tabulationStudents, selectedExam]);
+
+  // Tabulation pagination calculation
+  const totalTabulationCount = tabulationStudents.length;
+  const effectivePageSize = tabulationPageSize === -1 ? (totalTabulationCount || 1) : tabulationPageSize;
+  const totalTabulationPages = Math.max(1, Math.ceil(totalTabulationCount / effectivePageSize));
+  const safeCurrentPage = Math.min(Math.max(1, tabulationPage), totalTabulationPages);
+  const startIdx = (safeCurrentPage - 1) * effectivePageSize;
+  const paginatedTabulationStudents = tabulationPageSize === -1
+    ? tabulationStudents
+    : tabulationStudents.slice(startIdx, startIdx + effectivePageSize);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
@@ -824,7 +855,10 @@ export default function ExamsAndAdmitCardTab({
             <div className="flex flex-wrap items-center gap-2">
               <select
                 value={selectedExam}
-                onChange={e => setSelectedExam(e.target.value as ExamType)}
+                onChange={e => {
+                  setSelectedExam(e.target.value as ExamType);
+                  setTabulationPage(1);
+                }}
                 className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50"
               >
                 <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
@@ -835,7 +869,10 @@ export default function ExamsAndAdmitCardTab({
 
               <select
                 value={selectedClass}
-                onChange={e => setSelectedClass(e.target.value)}
+                onChange={e => {
+                  setSelectedClass(e.target.value);
+                  setTabulationPage(1);
+                }}
                 className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50"
               >
                 <option value="6">৬ষ্ঠ শ্রেণি</option>
@@ -847,7 +884,10 @@ export default function ExamsAndAdmitCardTab({
 
               <select
                 value={selectedSection}
-                onChange={e => setSelectedSection(e.target.value)}
+                onChange={e => {
+                  setSelectedSection(e.target.value);
+                  setTabulationPage(1);
+                }}
                 className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50"
               >
                 <option value="all">সকল শাখা (ক, খ, গ, ঘ)</option>
@@ -857,10 +897,26 @@ export default function ExamsAndAdmitCardTab({
                 <option value="D">শাখা: ঘ (D)</option>
               </select>
 
+              <select
+                value={tabulationGender}
+                onChange={e => {
+                  setTabulationGender(e.target.value as 'all' | 'male' | 'female');
+                  setTabulationPage(1);
+                }}
+                className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50"
+              >
+                <option value="all">👥 ছাত্র ও ছাত্রী (উভয়)</option>
+                <option value="male">👨 শুধু ছাত্র</option>
+                <option value="female">👩 শুধু ছাত্রী</option>
+              </select>
+
               {(selectedClass === '9' || selectedClass === '10') && (
                 <select
                   value={selectedGroup}
-                  onChange={e => setSelectedGroup(e.target.value)}
+                  onChange={e => {
+                    setSelectedGroup(e.target.value);
+                    setTabulationPage(1);
+                  }}
                   className="px-3 py-2 border border-amber-300 rounded-xl text-xs font-bold text-amber-950 bg-amber-50/70"
                 >
                   <option value="all">সকল বিভাগ</option>
@@ -870,10 +926,24 @@ export default function ExamsAndAdmitCardTab({
                 </select>
               )}
 
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="নাম বা রোল দিয়ে খুঁজুন..."
+                  value={tabulationSearch}
+                  onChange={e => {
+                    setTabulationSearch(e.target.value);
+                    setTabulationPage(1);
+                  }}
+                  className="pl-8 pr-3 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0c3664] w-36 sm:w-44"
+                />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+              </div>
+
               <button
                 type="button"
                 onClick={() => setShowTabulationModal(true)}
-                className="px-4 py-2 bg-gradient-to-r from-[#0c3664] to-[#144275] text-amber-300 hover:text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-transform active:scale-95"
+                className="px-4 py-2 bg-gradient-to-r from-[#0c3664] to-[#144275] text-amber-300 hover:text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-transform active:scale-95 whitespace-nowrap"
               >
                 <FileSpreadsheet className="w-4 h-4 text-amber-400" />
                 <span>📊 ফুলস্ক্রিন টেবুলেশন শীট খুলুন</span>
@@ -907,14 +977,18 @@ export default function ExamsAndAdmitCardTab({
 
           {/* Tabulation Preview Table */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                {formatClassBangla(selectedClass)} {selectedSection !== 'all' ? `(${formatSectionBangla(selectedSection)})` : ''} · {selectedExam} ফলাফল সংক্ষিপ্ত গেজেট
+                {formatClassBangla(selectedClass)}
+                {selectedSection !== 'all' ? ` · ${formatSectionBangla(selectedSection)}` : ' · সকল শাখা'}
+                {(selectedClass === '9' || selectedClass === '10') && selectedGroup !== 'all' ? ` · ${formatGroupBangla(selectedGroup)}` : ''}
+                {tabulationGender !== 'all' ? (tabulationGender === 'male' ? ' · (ছাত্র)' : ' · (ছাত্রী)') : ''}
+                {' · '}{selectedExam} ফলাফল সংক্ষিপ্ত গেজেট
               </h4>
               <button
                 type="button"
                 onClick={() => setShowTabulationModal(true)}
-                className="text-xs font-bold text-[#0c3664] hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-[#0c3664] hover:underline flex items-center gap-1 self-start sm:self-auto"
               >
                 <span>সম্পূর্ণ টেবুলেশন ও প্রিন্ট ভিউ দেখুন</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -925,56 +999,160 @@ export default function ExamsAndAdmitCardTab({
               <table className="w-full text-xs text-left">
                 <thead className="bg-[#0c3664] text-white font-bold">
                   <tr>
-                    <th className="py-2 px-3 text-center">মেধা ক্রম</th>
-                    <th className="py-2 px-2 text-center">রোল</th>
-                    <th className="py-2 px-3">শিক্ষার্থীর নাম</th>
-                    <th className="py-2 px-2 text-center">শাখা</th>
-                    <th className="py-2 px-2 text-center">মোট প্রাপ্ত</th>
-                    <th className="py-2 px-2 text-center">গ্রেড</th>
-                    <th className="py-2 px-2 text-center">জিপিএ (GPA)</th>
-                    <th className="py-2 px-2 text-center">ফলাফল</th>
-                    <th className="py-2 px-3 text-center">অ্যাকশন</th>
+                    <th className="py-2.5 px-3 text-center">মেধা ক্রম</th>
+                    <th className="py-2.5 px-2 text-center">রোল</th>
+                    <th className="py-2.5 px-3">শিক্ষার্থীর নাম</th>
+                    <th className="py-2.5 px-2 text-center">শাখা</th>
+                    <th className="py-2.5 px-2 text-center">মোট প্রাপ্ত</th>
+                    <th className="py-2.5 px-2 text-center">গ্রেড</th>
+                    <th className="py-2.5 px-2 text-center">জিপিএ (GPA)</th>
+                    <th className="py-2.5 px-2 text-center">ফলাফল</th>
+                    <th className="py-2.5 px-3 text-center">অ্যাকশন</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {filteredStudents.slice(0, 10).map((s, idx) => {
-                    const rec = s.examRecords && s.examRecords[selectedExam]
-                      ? s.examRecords[selectedExam]
-                      : generateSampleMarksForStudent(s, selectedExam);
-                    return (
-                      <tr key={s.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                        <td className="py-2 px-3 text-center font-bold text-indigo-900">{idx + 1}</td>
-                        <td className="py-2 px-2 text-center font-black text-red-600">{s.roll}</td>
-                        <td className="py-2 px-3 font-bold text-slate-900">{s.name}</td>
-                        <td className="py-2 px-2 text-center">{s.section}</td>
-                        <td className="py-2 px-2 text-center font-mono font-bold">{rec.obtainedTotal}</td>
-                        <td className="py-2 px-2 text-center font-black text-blue-700">{rec.grade}</td>
-                        <td className="py-2 px-2 text-center font-mono font-bold text-emerald-700">{rec.gpa.toFixed(2)}</td>
-                        <td className="py-2 px-2 text-center">
-                          {rec.isPassed ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">উত্তীর্ণ</span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">অকৃতকার্য</span>
-                          )}
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedStudentForMarksheet(s);
-                              setShowMarksheetModal(true);
-                            }}
-                            className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-lg text-[11px] transition-colors"
-                          >
-                            মার্কশীট
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {paginatedTabulationStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-slate-500 font-medium">
+                        কোনো শিক্ষার্থী পাওয়া যায়নি। ফিল্টার বা অনুসন্ধান শব্দ পরিবর্তন করে চেষ্টা করুন।
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedTabulationStudents.map((s, idx) => {
+                      const rec = s.examRecords && s.examRecords[selectedExam]
+                        ? s.examRecords[selectedExam]
+                        : generateSampleMarksForStudent(s, selectedExam);
+                      const currentRank = startIdx + idx + 1;
+                      return (
+                        <tr key={s.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50 hover:bg-slate-100/60 transition-colors'}>
+                          <td className="py-2 px-3 text-center font-bold text-indigo-900">{currentRank}</td>
+                          <td className="py-2 px-2 text-center font-black text-red-600">{s.roll}</td>
+                          <td className="py-2 px-3 font-bold text-slate-900">
+                            <div>{s.name}</div>
+                            <div className="text-[10px] text-slate-400 font-mono">{s.gender === 'female' ? 'ছাত্রী' : 'ছাত্র'} · ID: {s.id}</div>
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <span className="px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-bold">{s.section}</span>
+                          </td>
+                          <td className="py-2 px-2 text-center font-mono font-bold">{rec.obtainedTotal}</td>
+                          <td className="py-2 px-2 text-center font-black text-blue-700">{rec.grade}</td>
+                          <td className="py-2 px-2 text-center font-mono font-bold text-emerald-700">{rec.gpa.toFixed(2)}</td>
+                          <td className="py-2 px-2 text-center">
+                            {rec.isPassed ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">উত্তীর্ণ</span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">অকৃতকার্য</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedStudentForMarksheet(s);
+                                setShowMarksheetModal(true);
+                              }}
+                              className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-lg text-[11px] transition-colors"
+                            >
+                              মার্কশীট
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalTabulationCount > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200">
+                {/* Count summary */}
+                <div className="text-xs text-slate-600 font-medium text-center sm:text-left">
+                  দেখানো হচ্ছে: <span className="font-bold text-slate-900">{startIdx + 1}</span>–
+                  <span className="font-bold text-slate-900">{Math.min(startIdx + (tabulationPageSize === -1 ? totalTabulationCount : tabulationPageSize), totalTabulationCount)}</span> (মোট <span className="font-black text-[#0c3664]">{totalTabulationCount}</span> জন শিক্ষার্থী)
+                </div>
+
+                {/* Per page selector & page buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <div className="flex items-center gap-1 text-xs text-slate-600">
+                    <span className="text-[11px] font-semibold text-slate-500">প্রতি পৃষ্ঠায়:</span>
+                    {[10, 25, 50, -1].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setTabulationPageSize(size);
+                          setTabulationPage(1);
+                        }}
+                        className={`px-2 py-0.5 text-xs rounded-lg font-bold transition-all ${
+                          tabulationPageSize === size
+                            ? 'bg-[#0c3664] text-white shadow-xs'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {size === -1 ? 'সকল' : `${size} জন`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {tabulationPageSize !== -1 && totalTabulationPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={safeCurrentPage === 1}
+                        onClick={() => setTabulationPage(p => Math.max(1, p - 1))}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-0.5 transition-colors"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span>পূর্ববর্তী</span>
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalTabulationPages }, (_, i) => i + 1).map((pageNum) => {
+                          if (
+                            totalTabulationPages > 7 &&
+                            pageNum !== 1 &&
+                            pageNum !== totalTabulationPages &&
+                            Math.abs(pageNum - safeCurrentPage) > 1
+                          ) {
+                            if (pageNum === 2 || pageNum === totalTabulationPages - 1) {
+                              return <span key={pageNum} className="px-1 text-slate-400 text-xs">...</span>;
+                            }
+                            return null;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              type="button"
+                              onClick={() => setTabulationPage(pageNum)}
+                              className={`min-w-[28px] h-7 px-1 text-xs rounded-lg font-bold transition-all ${
+                                safeCurrentPage === pageNum
+                                  ? 'bg-[#0c3664] text-white shadow-xs'
+                                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={safeCurrentPage === totalTabulationPages}
+                        onClick={() => setTabulationPage(p => Math.min(totalTabulationPages, p + 1))}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-0.5 transition-colors"
+                      >
+                        <span>পরবর্তী</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
