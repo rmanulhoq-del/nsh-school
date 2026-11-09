@@ -375,11 +375,11 @@ export default function StudentSlipModal({
           <div className="space-y-2.5 pt-2 border-t border-slate-200">
             <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
               <CreditCard className="w-4 h-4 text-[#d9482b]" />
-              <span>পরীক্ষা ও মূল্যায়ন ফি বিবরণী (১ম সাময়িক, ২য় সাময়িক, বার্ষিক ও টেস্ট পরীক্ষা)</span>
+              <span>পরীক্ষা ও মূল্যায়ন ফি বিবরণী (১ম সাময়িক, ২য় সাময়িক, বার্ষিক{isClass10 ? ' ও টেস্ট পরীক্ষা' : ''})</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
-              {EXAM_TYPES_LIST.map((exam) => {
+            <div className={`grid gap-2.5 text-xs ${isClass10 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
+              {(isClass10 ? EXAM_TYPES_LIST : EXAM_TYPES_LIST.filter(e => e.id !== 'টেস্ট পরীক্ষা')).map((exam) => {
                 const isPaid = !!examStatusMap[exam.id];
                 return (
                   <div

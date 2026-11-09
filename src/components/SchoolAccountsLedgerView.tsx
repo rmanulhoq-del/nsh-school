@@ -94,20 +94,20 @@ export default function SchoolAccountsLedgerView({
 
   const bkbBalance = useMemo(() => {
     const inc = transactions
-      .filter(t => t.bank === 'বাংলাদেশ কৃষি ব্যাংক' && t.type === 'income')
+      .filter(t => t.bank && (t.bank === 'বাংলাদেশ কৃষি ব্যাংক' || t.bank.includes('কৃষি ব্যাংক')) && t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
     const exp = transactions
-      .filter(t => t.bank === 'বাংলাদেশ কৃষি ব্যাংক' && t.type === 'expense')
+      .filter(t => t.bank && (t.bank === 'বাংলাদেশ কৃষি ব্যাংক' || t.bank.includes('কৃষি ব্যাংক')) && t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
     return inc - exp;
   }, [transactions]);
 
   const ificBalance = useMemo(() => {
     const inc = transactions
-      .filter(t => t.bank === 'আইএফআইসি ব্যাংক' && t.type === 'income')
+      .filter(t => t.bank && (t.bank === 'আইএফআইসি ব্যাংক' || t.bank.includes('আইএফআইসি')) && t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
     const exp = transactions
-      .filter(t => t.bank === 'আইএফআইসি ব্যাংক' && t.type === 'expense')
+      .filter(t => t.bank && (t.bank === 'আইএফআইসি ব্যাংক' || t.bank.includes('আইএফআইসি')) && t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
     return inc - exp;
   }, [transactions]);
@@ -126,7 +126,15 @@ export default function SchoolAccountsLedgerView({
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       if (filterType !== 'all' && t.type !== filterType) return false;
-      if (filterBank !== 'all' && t.bank !== filterBank) return false;
+      if (filterBank !== 'all') {
+        if (filterBank === 'বাংলাদেশ কৃষি ব্যাংক') {
+          if (!t.bank || !t.bank.includes('কৃষি ব্যাংক')) return false;
+        } else if (filterBank === 'আইএফআইসি ব্যাংক') {
+          if (!t.bank || !t.bank.includes('আইএফআইসি')) return false;
+        } else if (t.bank !== filterBank) {
+          return false;
+        }
+      }
       if (filterCategory !== 'all' && t.category !== filterCategory) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();

@@ -340,8 +340,8 @@ export default function App() {
   const totalStudents = students.length;
   const paidStudents = students.filter(s => s.status === 'paid').length;
   const dueStudents = students.filter(s => s.status === 'due').length;
-  const krishiCount = students.filter(s => s.status === 'paid' && s.paidBank === 'বাংলাদেশ কৃষি ব্যাংক').length;
-  const ificCount = students.filter(s => s.status === 'paid' && s.paidBank === 'আইএফআইসি ব্যাংক').length;
+  const krishiCount = students.filter(s => s.status === 'paid' && s.paidBank && s.paidBank.includes('কৃষি ব্যাংক')).length;
+  const ificCount = students.filter(s => s.status === 'paid' && s.paidBank && s.paidBank.includes('আইএফআইসি')).length;
   const totalCollected = students.filter(s => s.status === 'paid').reduce((acc, curr) => acc + curr.monthlyFee + curr.examFee, 0);
   const totalDueAmount = students.filter(s => s.status === 'due').reduce((acc, curr) => acc + curr.monthlyFee + curr.examFee, 0);
 

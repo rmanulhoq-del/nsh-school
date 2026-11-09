@@ -11,10 +11,12 @@ import {
   DollarSign,
   FileSpreadsheet,
   Printer,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import SchoolLogo from './SchoolLogo';
-import { Student, NavTab, Transaction, formatClassOrdinal, sortStudentsBySerial } from '../types';
+import { Student, NavTab, Transaction, formatClassBangla, formatSectionBangla, formatGroupBangla, sortStudentsBySerial } from '../types';
 import SchoolAccountsLedgerView from './SchoolAccountsLedgerView';
 import { INITIAL_TRANSACTIONS } from '../data/initialData';
 
@@ -56,9 +58,13 @@ export default function BankDashboardTab({
   const [activeSubTab, setActiveSubTab] = useState<'student_fees' | 'income_expense'>(initialSubTab);
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all');
+  const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'paid' | 'due'>('all');
-  const [selectedBank, setSelectedBank] = useState<'all' | 'বাংলাদেশ কৃষি ব্যাংক' | 'আইএফআইসি ব্যাংক'>('all');
+  const [selectedBank, setSelectedBank] = useState<'all' | 'krishi' | 'ific'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(15);
 
   const safeTransactions = transactions || INITIAL_TRANSACTIONS;
 
@@ -82,21 +88,35 @@ export default function BankDashboardTab({
     const list = students.filter(student => {
       if (selectedClass !== 'all' && student.className !== selectedClass) return false;
       if (selectedSection !== 'all' && student.section !== selectedSection) return false;
+      if (selectedGender !== 'all' && student.gender !== selectedGender) return false;
+      if ((selectedClass === '9' || selectedClass === '10') && selectedGroup !== 'all' && student.group !== selectedGroup) return false;
       if (selectedStatus !== 'all' && student.status !== selectedStatus) return false;
-      if (selectedBank !== 'all' && student.paidBank !== selectedBank) return false;
+      if (selectedBank === 'krishi') {
+        if (!student.paidBank || !student.paidBank.includes('কৃষি ব্যাংক')) return false;
+      } else if (selectedBank === 'ific') {
+        if (!student.paidBank || !student.paidBank.includes('আইএফআইসি')) return false;
+      }
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesName = student.name.toLowerCase().includes(query);
         const matchesId = student.id.toLowerCase().includes(query);
         const matchesRoll = student.roll.toString().includes(query);
-        const matchesPhone = student.guardianPhone.includes(query);
+        const matchesPhone = (student.guardianPhone || '').includes(query);
         if (!matchesName && !matchesId && !matchesRoll && !matchesPhone) return false;
       }
       return true;
     });
 
     return sortStudentsBySerial(list);
-  }, [students, selectedClass, selectedSection, selectedStatus, selectedBank, searchQuery]);
+  }, [students, selectedClass, selectedSection, selectedGender, selectedGroup, selectedStatus, selectedBank, searchQuery]);
+
+  // Pagination calculations
+  const totalCount = filteredStudents.length;
+  const effectivePageSize = pageSize === -1 ? (totalCount || 1) : pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalCount / effectivePageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIdx = (safePage - 1) * effectivePageSize;
+  const paginatedStudents = pageSize === -1 ? filteredStudents : filteredStudents.slice(startIdx, startIdx + effectivePageSize);
 
   return (
     <div className="space-y-6">
@@ -277,13 +297,16 @@ export default function BankDashboardTab({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
               <div>
                 <label className="text-xs font-semibold text-slate-600 mb-1 block">শ্রেণি</label>
                 <select
                   value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2"
+                  onChange={(e) => {
+                    setSelectedClass(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2 font-medium"
                 >
                   <option value="all">সকল শ্রেণি (৬ষ্ঠ - ১০ম)</option>
                   <option value="6">৬ষ্ঠ শ্রেণি</option>
@@ -298,23 +321,80 @@ export default function BankDashboardTab({
                 <label className="text-xs font-semibold text-slate-600 mb-1 block">শাখা</label>
                 <select
                   value={selectedSection}
-                  onChange={(e) => setSelectedSection(e.target.value)}
-                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2"
+                  onChange={(e) => {
+                    setSelectedSection(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2 font-medium"
                 >
-                  <option value="all">সকল শাখা (A, B, C, D)</option>
-                  <option value="A">শাখা A</option>
-                  <option value="B">শাখা B</option>
-                  <option value="C">শাখা C</option>
-                  <option value="D">শাখা D</option>
+                  <option value="all">সকল শাখা (ক, খ, গ, ঘ)</option>
+                  <option value="A">শাখা: ক (A)</option>
+                  <option value="B">শাখা: খ (B)</option>
+                  <option value="C">শাখা: গ (C)</option>
+                  <option value="D">শাখা: ঘ (D)</option>
                 </select>
               </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1 block">লিঙ্গ (ছাত্র / ছাত্রী)</label>
+                <select
+                  value={selectedGender}
+                  onChange={(e) => {
+                    setSelectedGender(e.target.value as any);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2 font-medium"
+                >
+                  <option value="all">👥 সকল (ছাত্র ও ছাত্রী)</option>
+                  <option value="male">👦 শুধু ছাত্র (Boys)</option>
+                  <option value="female">👧 শুধু ছাত্রী (Girls)</option>
+                </select>
+              </div>
+
+              {(selectedClass === '9' || selectedClass === '10') ? (
+                <div>
+                  <label className="text-xs font-semibold text-amber-900 mb-1 block">বিভাগ</label>
+                  <select
+                    value={selectedGroup}
+                    onChange={(e) => {
+                      setSelectedGroup(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full text-xs bg-amber-50/70 border border-amber-300 rounded-xl px-3 py-2 font-bold text-amber-950"
+                  >
+                    <option value="all">সকল বিভাগ</option>
+                    <option value="science">🧪 বিজ্ঞান বিভাগ</option>
+                    <option value="humanities">📚 মানবিক বিভাগ</option>
+                    <option value="business">💼 ব্যবসায় শিক্ষা</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">ব্যাংক অ্যাকাউন্ট</label>
+                  <select
+                    value={selectedBank}
+                    onChange={(e) => {
+                      setSelectedBank(e.target.value as any);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2 font-medium"
+                  >
+                    <option value="all">উভয় ব্যাংক (সকল শাখা)</option>
+                    <option value="krishi">বাংলাদেশ কৃষি ব্যাংক (নাপোড়া শাখা)</option>
+                    <option value="ific">আইএফআইসি ব্যাংক (নাপোড়া উপশাখা)</option>
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-semibold text-slate-600 mb-1 block">পেমেন্ট অবস্থা</label>
                 <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
                   <button
                     type="button"
-                    onClick={() => setSelectedStatus('all')}
+                    onClick={() => {
+                      setSelectedStatus('all');
+                      setCurrentPage(1);
+                    }}
                     className={`flex-1 py-1.5 text-xs font-medium rounded-lg ${
                       selectedStatus === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
                     }`}
@@ -323,7 +403,10 @@ export default function BankDashboardTab({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedStatus('paid')}
+                    onClick={() => {
+                      setSelectedStatus('paid');
+                      setCurrentPage(1);
+                    }}
                     className={`flex-1 py-1.5 text-xs font-semibold rounded-lg ${
                       selectedStatus === 'paid' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600'
                     }`}
@@ -332,7 +415,10 @@ export default function BankDashboardTab({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedStatus('due')}
+                    onClick={() => {
+                      setSelectedStatus('due');
+                      setCurrentPage(1);
+                    }}
                     className={`flex-1 py-1.5 text-xs font-semibold rounded-lg ${
                       selectedStatus === 'due' ? 'bg-white text-rose-700 shadow-xs' : 'text-slate-600'
                     }`}
@@ -342,30 +428,35 @@ export default function BankDashboardTab({
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-600 mb-1 block">ব্যাংক অ্যাকাউন্ট</label>
-                <select
-                  value={selectedBank}
-                  onChange={(e) => setSelectedBank(e.target.value as any)}
-                  className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2"
-                >
-                  <option value="all">উভয় ব্যাংক (সকল শাখা)</option>
-                  <option value="বাংলাদেশ কৃষি ব্যাংক">বাংলাদেশ কৃষি ব্যাংক, নাপোড়া বাজার শাখা</option>
-                  <option value="আইএফআইসি ব্যাংক">আইএফআইসি ব্যাংক, নাপোড়া বাজার উপশাখা</option>
-                </select>
-              </div>
+              {(selectedClass === '9' || selectedClass === '10') && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">ব্যাংক অ্যাকাউন্ট</label>
+                  <select
+                    value={selectedBank}
+                    onChange={(e) => {
+                      setSelectedBank(e.target.value as any);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full text-xs bg-[#f0f6f6] border border-[#d2e5e7] rounded-xl px-3 py-2 font-medium"
+                  >
+                    <option value="all">উভয় ব্যাংক (সকল শাখা)</option>
+                    <option value="krishi">বাংলাদেশ কৃষি ব্যাংক (নাপোড়া শাখা)</option>
+                    <option value="ific">আইএফআইসি ব্যাংক (নাপোড়া উপশাখা)</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Students Table */}
           <div className="bg-white border border-[#d9e6e7] rounded-2xl shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between text-xs">
+            <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
               <span className="font-bold text-slate-900">
-                শিক্ষার্থীদের ফি পরিশোধ বিবরণী ({filteredStudents.length} জন)
+                শিক্ষার্থীদের ব্যাংক ফি আদায় ও পরিশোধ বিবরণী ({filteredStudents.length} জন)
               </span>
               <div className="flex items-center gap-3">
-                <span className="text-emerald-700 font-semibold">● সবুজ = পরিশোধিত</span>
-                <span className="text-rose-700 font-semibold">● লাল = বকেয়া</span>
+                <span className="text-emerald-700 font-semibold">● সবুজ = পরিশোধিত (পেইড)</span>
+                <span className="text-rose-700 font-semibold">● লাল = বকেয়া (ডিউ)</span>
               </div>
             </div>
 
@@ -373,7 +464,8 @@ export default function BankDashboardTab({
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#f0f6f6] border-b border-[#d2e5e7] text-slate-700 font-semibold">
                   <tr>
-                    <th className="py-3 px-4">রোল ও আইডি</th>
+                    <th className="py-3 px-3 text-center">ক্রম</th>
+                    <th className="py-3 px-4">রোল ও শিক্ষার্থী আইডি</th>
                     <th className="py-3 px-4">নাম</th>
                     <th className="py-3 px-4">শ্রেণি ও শাখা</th>
                     <th className="py-3 px-4 text-right">ফি ও বেতনের মাস</th>
@@ -384,72 +476,180 @@ export default function BankDashboardTab({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredStudents.map(student => (
-                    <tr key={student.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-mono font-medium text-slate-900">
-                        <div>রোল: {student.roll}</div>
-                        <div className="text-[10px] text-slate-400">{student.id}</div>
-                      </td>
-                      <td className="py-3 px-4 font-medium text-slate-900">{student.name}</td>
-                      <td className="py-3 px-4 text-slate-600">{formatClassOrdinal(student.className)} · শাখা {student.section}</td>
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900">৳{student.monthlyFee + student.examFee}</div>
-                        <div className="text-[10px] font-semibold mt-0.5 inline-block">
-                          {student.status === 'paid' ? (
-                            <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
-                              {student.paidMonth || 'অক্টোবর ২০২৬'} (পরিশোধিত)
-                            </span>
-                          ) : (
-                            <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold border border-rose-200">
-                              {student.dueMonth || 'অক্টোবর ২০২৬'} (বকেয়া)
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {student.status === 'paid' ? (
-                          <span className="inline-block bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-0.5 rounded text-[11px] font-bold">
-                            পরিশোধিত
-                          </span>
-                        ) : (
-                          <span className="inline-block bg-rose-50 border border-rose-200 text-rose-700 px-2.5 py-0.5 rounded text-[11px] font-bold">
-                            বকেয়া (Due)
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-slate-700">
-                        {student.status === 'paid' ? (
-                          <div>
-                            <div className="font-semibold text-[#0c3664]">{student.paidBank}</div>
-                            <div className="font-mono text-[10px] text-slate-400">Txn: {student.txnId}</div>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic">এখনও জমা হয়নি</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
-                        {student.paymentDate || '—'}
-                      </td>
-                      <td className="py-3 px-4 text-center whitespace-nowrap">
-                        {onOpenSlip ? (
-                          <button
-                            type="button"
-                            onClick={() => onOpenSlip(student)}
-                            className="px-3 py-1.5 bg-[#0c3664] hover:bg-[#092b50] text-amber-300 hover:text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors mx-auto shadow-2xs border border-amber-400/30"
-                            title="এই শিক্ষার্থীর ১২ মাসের ফি বিবরণী ও ব্যাংক রসিদ স্লিপ দেখুন"
-                          >
-                            <Printer className="w-3.5 h-3.5 text-amber-300" />
-                            <span>১২ মাসের রসিদ</span>
-                          </button>
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
+                  {paginatedStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-slate-500 font-medium">
+                        কোনো শিক্ষার্থী পাওয়া যায়নি। ফিল্টার বা অনুসন্ধান শব্দ পরিবর্তন করে চেষ্টা করুন।
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    paginatedStudents.map((student, idx) => (
+                      <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-3 text-center font-bold text-slate-500">{startIdx + idx + 1}</td>
+                        <td className="py-3 px-4 font-mono font-medium text-slate-900">
+                          <div>রোল: <span className="font-black text-red-600">{student.roll}</span></div>
+                          <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+                            {student.gender === 'female' ? '👧 ছাত্রী' : '👦 ছাত্র'} · <span className="text-slate-400 font-mono">{student.id}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-bold text-slate-900">{student.name}</td>
+                        <td className="py-3 px-4 text-slate-600">
+                          <div className="font-semibold text-slate-800">
+                            {formatClassBangla(student.className)} · {formatSectionBangla(student.section)}
+                          </div>
+                          {student.group && (
+                            <div className="text-[10px] text-amber-800 font-bold mt-0.5">
+                              {formatGroupBangla(student.group)}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="font-mono font-bold text-slate-900">৳{student.monthlyFee + student.examFee}</div>
+                          <div className="text-[10px] font-semibold mt-0.5 inline-block">
+                            {student.status === 'paid' ? (
+                              <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                                {student.paidMonth || 'অক্টোবর ২০২৬'} (পরিশোধিত)
+                              </span>
+                            ) : (
+                              <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold border border-rose-200">
+                                {student.dueMonth || 'অক্টোবর ২০২৬'} (বকেয়া)
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {student.status === 'paid' ? (
+                            <span className="inline-block bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-0.5 rounded text-[11px] font-bold">
+                              পরিশোধিত
+                            </span>
+                          ) : (
+                            <span className="inline-block bg-rose-50 border border-rose-200 text-rose-700 px-2.5 py-0.5 rounded text-[11px] font-bold">
+                              বকেয়া (Due)
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-slate-700">
+                          {student.status === 'paid' ? (
+                            <div>
+                              <div className="font-semibold text-[#0c3664]">{student.paidBank || 'বাংলাদেশ কৃষি ব্যাংক, নাপোড়া শাখা'}</div>
+                              <div className="font-mono text-[10px] text-slate-400">Txn: {student.txnId || 'BKB-AUTO'}</div>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic">এখনও জমা হয়নি</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                          {student.paymentDate || '—'}
+                        </td>
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          {onOpenSlip ? (
+                            <button
+                              type="button"
+                              onClick={() => onOpenSlip(student)}
+                              className="px-3 py-1.5 bg-[#0c3664] hover:bg-[#092b50] text-amber-300 hover:text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors mx-auto shadow-2xs border border-amber-400/30"
+                              title="এই শিক্ষার্থীর ১২ মাসের ফি বিবরণী ও ব্যাংক রসিদ স্লিপ দেখুন"
+                            >
+                              <Printer className="w-3.5 h-3.5 text-amber-300" />
+                              <span>১২ মাসের রসিদ</span>
+                            </button>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalCount > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-slate-100 bg-slate-50/50">
+                <div className="text-xs text-slate-600 font-medium">
+                  দেখানো হচ্ছে: <span className="font-bold text-slate-900">{startIdx + 1}</span>–
+                  <span className="font-bold text-slate-900">{Math.min(startIdx + (pageSize === -1 ? totalCount : pageSize), totalCount)}</span> (মোট <span className="font-black text-[#0c3664]">{totalCount}</span> জন শিক্ষার্থী)
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <div className="flex items-center gap-1 text-xs text-slate-600">
+                    <span className="text-[11px] font-semibold text-slate-500">প্রতি পৃষ্ঠায়:</span>
+                    {[15, 30, 50, -1].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setPageSize(size);
+                          setCurrentPage(1);
+                        }}
+                        className={`px-2 py-0.5 text-xs rounded-lg font-bold transition-all ${
+                          pageSize === size
+                            ? 'bg-[#0c3664] text-white shadow-xs'
+                            : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
+                        }`}
+                      >
+                        {size === -1 ? 'সকল' : `${size} জন`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {pageSize !== -1 && totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={safePage === 1}
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-0.5 transition-colors bg-white"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span>পূর্ববর্তী</span>
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                          if (
+                            totalPages > 7 &&
+                            pageNum !== 1 &&
+                            pageNum !== totalPages &&
+                            Math.abs(pageNum - safePage) > 1
+                          ) {
+                            if (pageNum === 2 || pageNum === totalPages - 1) {
+                              return <span key={pageNum} className="px-1 text-slate-400 text-xs">...</span>;
+                            }
+                            return null;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              type="button"
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`min-w-[28px] h-7 px-1 text-xs rounded-lg font-bold transition-all ${
+                                safePage === pageNum
+                                  ? 'bg-[#0c3664] text-white shadow-xs'
+                                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={safePage === totalPages}
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-0.5 transition-colors bg-white"
+                      >
+                        <span>পরবর্তী</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
