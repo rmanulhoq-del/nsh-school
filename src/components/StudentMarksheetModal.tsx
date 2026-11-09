@@ -250,7 +250,7 @@ export default function StudentMarksheetModal({
                   একাডেমিক নম্বর ফর্দ / মার্কশিট (Academic Marksheet)
                 </span>
                 <div className="text-xs font-bold text-[#d9482b] mt-1">
-                  {selectedExam} পরীক্ষা — শিক্ষাবর্ষ: {student.feeYear || '২০২৬'}
+                  {selectedExam.includes('পরীক্ষা') ? selectedExam : `${selectedExam} পরীক্ষা`} — শিক্ষাবর্ষ: {student.feeYear || '২০২৬'}
                 </div>
               </div>
             </div>

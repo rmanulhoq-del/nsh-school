@@ -222,7 +222,7 @@ export default function ExamsAndAdmitCardTab({
               পরীক্ষা, ফলাফল ও মার্কশীট ব্যবস্থাপনা পোর্টাল
             </h1>
             <p className="text-xs sm:text-sm text-slate-200 mt-1 max-w-2xl">
-              ১ম সাময়িক, ২য় সাময়িক ও বার্ষিক পরীক্ষার নম্বর এন্ট্রি, ক্লাসের সার্বিক টেবুলেশন শীট, শিক্ষার্থীদের পাসকোড ভিত্তিক ফলাফল অনুসন্ধান ও অফিশিয়াল প্রবেশপত্র।
+              ১ম সাময়িক, ২য় সাময়িক, বার্ষিক ও টেস্ট পরীক্ষার নম্বর এন্ট্রি, ক্লাসের সার্বিক টেবুলেশন শীট, শিক্ষার্থীদের পাসকোড ভিত্তিক ফলাফল অনুসন্ধান ও অফিশিয়াল প্রবেশপত্র।
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function ExamsAndAdmitCardTab({
                 type="button"
                 onClick={() => setShowMarksEntryModal(true)}
                 className="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all border border-emerald-400/50"
-                title="১ম, ২য় বা বার্ষিক পরীক্ষার নম্বর ইনপুট দিন"
+                title="১ম, ২য়, বার্ষিক বা টেস্ট পরীক্ষার নম্বর ইনপুট দিন"
               >
                 <Pencil className="w-3.5 h-3.5 text-amber-300" />
                 <span>📝 নম্বর এন্ট্রি</span>
@@ -363,6 +363,7 @@ export default function ExamsAndAdmitCardTab({
                     <option value="১ম সাময়িক">১ম সাময়িক পরীক্ষা</option>
                     <option value="২য় সাময়িক">২য় সাময়িক পরীক্ষা</option>
                     <option value="বার্ষিক">বার্ষিক পরীক্ষা</option>
+                    <option value="টেস্ট পরীক্ষা">টেস্ট পরীক্ষা (SSC Test Exam)</option>
                   </select>
                 </div>
 
@@ -596,7 +597,7 @@ export default function ExamsAndAdmitCardTab({
                     ডাক: নাপোড়া, উপজেলা: বাঁশখালী, জেলা: চট্টগ্রাম · ইআইআইএন: ১০৪০৬২
                   </p>
                   <div className="inline-block bg-[#0c3664] text-amber-300 font-black text-xs sm:text-sm px-4 py-1 rounded-full uppercase tracking-wide mt-2 shadow-xs">
-                    {passcodeExam} পরীক্ষা ২০২৬ - অফিশিয়াল একাডেমিক নম্বর ফর্দ (Marksheet)
+                    {passcodeExam.includes('পরীক্ষা') ? passcodeExam : `${passcodeExam} পরীক্ষা`} ২০২৬ - অফিশিয়াল একাডেমিক নম্বর ফর্দ (Marksheet)
                   </div>
                 </div>
                 <div className="w-16 h-20 border border-slate-300 rounded-lg bg-slate-50 flex flex-col items-center justify-center text-[10px] text-slate-400 shrink-0">
@@ -993,7 +994,7 @@ export default function ExamsAndAdmitCardTab({
                 পরীক্ষার বিষয়ভিত্তিক নম্বর এন্ট্রি ও রেজাল্ট ইনপুট
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                ১ম সাময়িক, ২য় সাময়িক ও বার্ষিক পরীক্ষার CQ (সৃজনশীল), MCQ (বহুনির্বাচনি) ও ব্যবহারিক নম্বর সহজে ইনপুট দিন।
+                ১ম সাময়িক, ২য় সাময়িক, বার্ষিক ও টেস্ট পরীক্ষার CQ (সৃজনশীল), MCQ (বহুনির্বাচনি) ও ব্যবহারিক নম্বর সহজে ইনপুট দিন।
               </p>
             </div>
 
@@ -1228,7 +1229,7 @@ export default function ExamsAndAdmitCardTab({
                   ডাক: নাপোড়া, উপজেলা: বাঁশখালী, জেলা: চট্টগ্রাম · ইআইআইএন: ১০৪০৬২
                 </p>
                 <div className="inline-block bg-[#0c3664] text-white font-black text-xs sm:text-sm px-4 py-1 rounded-full uppercase tracking-wide mt-2 shadow-xs">
-                  {selectedExam} পরীক্ষা {examYear} - প্রবেশপত্র (Admit Card)
+                  {selectedExam.includes('পরীক্ষা') ? selectedExam : `${selectedExam} পরীক্ষা`} {examYear} - প্রবেশপত্র (Admit Card)
                 </div>
               </div>
 

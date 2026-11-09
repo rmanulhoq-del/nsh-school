@@ -423,6 +423,43 @@ export default function AttendanceHubTab({
               </div>
             </div>
 
+            {/* Quick Combined Section + Gender Buttons (যেমন: ১০ম ক ছাত্র, ১০ম ক ছাত্রী) */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 flex items-center gap-1">
+                <span>🏷️ দ্রুত সেকশন নির্বাচন:</span>
+              </span>
+              {[
+                { sec: 'A', g: 'male', label: `${selectedClass}ম ক ছাত্র`, icon: '👦' },
+                { sec: 'A', g: 'female', label: `${selectedClass}ম ক ছাত্রী`, icon: '👧' },
+                { sec: 'B', g: 'male', label: `${selectedClass}ম খ ছাত্র`, icon: '👦' },
+                { sec: 'B', g: 'female', label: `${selectedClass}ম খ ছাত্রী`, icon: '👧' },
+                { sec: 'C', g: 'male', label: `${selectedClass}ম গ ছাত্র`, icon: '👦' },
+                { sec: 'C', g: 'female', label: `${selectedClass}ম গ ছাত্রী`, icon: '👧' },
+                { sec: 'D', g: 'male', label: `${selectedClass}ম ঘ ছাত্র`, icon: '👦' },
+                { sec: 'D', g: 'female', label: `${selectedClass}ম ঘ ছাত্রী`, icon: '👧' },
+              ].map(b => {
+                const isActive = selectedSection === b.sec && selectedGender === b.g;
+                return (
+                  <button
+                    key={`${b.sec}-${b.g}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSection(b.sec);
+                      setSelectedGender(b.g as any);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border flex items-center gap-1 ${
+                      isActive
+                        ? 'bg-[#0c3664] text-white border-[#0c3664] shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>{b.icon}</span>
+                    <span>{b.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Quick Summary KPIs */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3 border-t border-slate-100">
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
@@ -541,7 +578,14 @@ export default function AttendanceHubTab({
                             {student.roll}
                           </td>
                           <td className="py-2.5 px-4">
-                            <div className="font-bold text-slate-900">{student.name}</div>
+                            <div className="font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                              <span>{student.name}</span>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                                student.gender === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
+                              }`}>
+                                {student.gender === 'female' ? '👧 ছাত্রী' : '👦 ছাত্র'}
+                              </span>
+                            </div>
                             <div className="text-[10px] text-slate-400">আইডি: {student.id}</div>
                           </td>
                           <td className="py-2.5 px-3">

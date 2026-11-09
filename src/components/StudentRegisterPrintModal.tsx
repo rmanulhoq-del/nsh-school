@@ -147,7 +147,7 @@ export default function StudentRegisterPrintModal({
             <div>
               <span className="text-slate-500 block text-[10px]">শাখা:</span>
               <strong className="text-slate-900">
-                {selectedSection === 'all' ? 'সকল শাখা (A, B, C, D)' : `শাখা '${selectedSection}'`}
+                {selectedSection === 'all' ? 'সকল শাখা (ক, খ, গ, ঘ)' : `শাখা '${selectedSection === 'A' ? 'ক' : selectedSection === 'B' ? 'খ' : selectedSection === 'C' ? 'গ' : 'ঘ'}' (${selectedSection})`}
               </strong>
             </div>
             <div>
@@ -212,7 +212,7 @@ export default function StudentRegisterPrintModal({
                         {stu.gender === 'female' ? 'ছাত্রী' : 'ছাত্র'}
                       </td>
                       <td className="border border-slate-300 py-1.5 px-1 text-[10.5px]">
-                        {formatClassBangla(stu.className)} ({stu.section})
+                        {formatClassBangla(stu.className)} ({stu.section === 'A' ? 'ক' : stu.section === 'B' ? 'খ' : stu.section === 'C' ? 'গ' : 'ঘ'})
                         {stu.group && (
                           <div className="text-[9px] text-slate-500">
                             {stu.group === 'science' ? 'বিজ্ঞান' : stu.group === 'humanities' ? 'মানবিক' : 'ব্যবসায়'}

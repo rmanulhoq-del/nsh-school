@@ -42,7 +42,8 @@ const ALL_12_MONTHS = [
 const EXAM_TYPES_LIST = [
   { id: '১ম সাময়িক', label: '১ম সাময়িক পরীক্ষা', month: 'এপ্রিল' },
   { id: '২য় সাময়িক', label: '২য় সাময়িক পরীক্ষা', month: 'আগস্ট' },
-  { id: 'বার্ষিক', label: 'বার্ষিক পরীক্ষা', month: 'নভেম্বর' }
+  { id: 'বার্ষিক', label: 'বার্ষিক পরীক্ষা', month: 'নভেম্বর' },
+  { id: 'টেস্ট পরীক্ষা', label: 'টেস্ট পরীক্ষা (SSC Test Exam)', month: 'ডিসেম্বর' }
 ];
 
 export default function StudentSlipModal({
@@ -57,7 +58,8 @@ export default function StudentSlipModal({
   const [examStatusMap, setExamStatusMap] = useState<Record<string, boolean>>({
     '১ম সাময়িক': true,
     '২য় সাময়িক': false,
-    'বার্ষিক': false
+    'বার্ষিক': false,
+    'টেস্ট পরীক্ষা': false
   });
   const [selectedBank, setSelectedBank] = useState<string>('বাংলাদেশ কৃষি ব্যাংক, নাপোড়া শাখা');
   const [receiptNote, setReceiptNote] = useState<string>('');
@@ -123,12 +125,14 @@ export default function StudentSlipModal({
   const paidTuitionTotal = paidMonthsCount * monthlyRate;
   const dueTuitionTotal = dueMonthsCount * monthlyRate;
 
+  const isClass10 = student.className === '10' || student.className === '১০';
+  const totalExamsCount = isClass10 ? 4 : 3;
   const paidExamsCount = Object.values(examStatusMap).filter(Boolean).length;
-  const dueExamsCount = 3 - paidExamsCount;
+  const dueExamsCount = Math.max(0, totalExamsCount - paidExamsCount);
   const paidExamTotal = paidExamsCount * examRate;
   const dueExamTotal = dueExamsCount * examRate;
 
-  const grandTotalAnnual = (12 * monthlyRate) + (3 * examRate);
+  const grandTotalAnnual = (12 * monthlyRate) + (totalExamsCount * examRate);
   const totalPaid = paidTuitionTotal + paidExamTotal;
   const totalDue = dueTuitionTotal + dueExamTotal;
 
@@ -272,7 +276,7 @@ export default function StudentSlipModal({
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
               <span className="text-[10px] text-blue-700 font-bold uppercase block">সর্বমোট বার্ষিক ফি</span>
               <span className="text-lg font-black text-[#0c3664] font-mono">৳{grandTotalAnnual}</span>
-              <span className="text-[10px] text-slate-500 block mt-0.5">১২ মাস বেতন + ৩ পরীক্ষা</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">১২ মাস বেতন + {totalExamsCount} পরীক্ষা</span>
             </div>
 
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
@@ -371,10 +375,10 @@ export default function StudentSlipModal({
           <div className="space-y-2.5 pt-2 border-t border-slate-200">
             <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
               <CreditCard className="w-4 h-4 text-[#d9482b]" />
-              <span>পরীক্ষা ও মূল্যায়ন ফি বিবরণী (১ম সাময়িক, ২য় সাময়িক ও বার্ষিক পরীক্ষা)</span>
+              <span>পরীক্ষা ও মূল্যায়ন ফি বিবরণী (১ম সাময়িক, ২য় সাময়িক, বার্ষিক ও টেস্ট পরীক্ষা)</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
               {EXAM_TYPES_LIST.map((exam) => {
                 const isPaid = !!examStatusMap[exam.id];
                 return (
